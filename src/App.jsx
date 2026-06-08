@@ -796,7 +796,9 @@ function ReceiptModal({ transaction, settings, onClose, thm }) {
               </>
             )}
             {transaction.paymentMethod === 'Kasbon' && (
-              <div className="text-center mt-3 bg-gray-100 p-1.5 rounded border border-gray-200 text-xs font-bold uppercase tracking-wider">Status: Belum Lunas</div>
+              <div className={`text-center mt-3 p-1.5 rounded border text-xs font-bold uppercase tracking-wider ${transaction.paymentStatus === 'Lunas' ? 'bg-green-50 border-green-200 text-green-600' : 'bg-gray-100 border-gray-200 text-gray-600'}`}>
+                Status: {transaction.paymentStatus}
+              </div>
             )}
           </div>
 
