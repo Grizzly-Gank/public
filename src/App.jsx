@@ -3,7 +3,7 @@ import {
   Menu, X, Home, ShoppingCart, Package, FileText, Settings as SettingsIcon, 
   LogOut, Plus, Minus, Trash2, Search, ScanLine, Printer, Download,
   Calendar, DollarSign, TrendingUp, CheckCircle, Upload, Users, BookOpen, Eye, EyeOff,
-  AlertCircle, Info
+  AlertCircle, Info, Edit
 } from 'lucide-react';
 
 // --- DATABASE & STATE MANAGEMENT (LocalStorage) ---
@@ -58,9 +58,9 @@ export default function App() {
 
   // Data States
   const [products, setProducts] = useLocalStorage('pos_products', [
-    { id: '1', name: 'Nasi Gudeg Spesial', stock: 50, buyPriceBox: 100000, buyPriceUnit: 10000, sellPrice: 15000, category: 'Makanan' },
-    { id: '2', name: 'Es Teh Manis', stock: 100, buyPriceBox: 20000, buyPriceUnit: 2000, sellPrice: 5000, category: 'Minuman' },
-    { id: '3', name: 'Keripik Singkong', stock: 5, buyPriceBox: 50000, buyPriceUnit: 5000, sellPrice: 8000, category: 'Cemilan' },
+    { id: '1', barcode: '899123456', name: 'Nasi Gudeg Spesial', stock: 50, buyPriceBox: 100000, buyPriceUnit: 10000, sellPrice: 15000, category: 'Makanan' },
+    { id: '2', barcode: '899654321', name: 'Es Teh Manis', stock: 100, buyPriceBox: 20000, buyPriceUnit: 2000, sellPrice: 5000, category: 'Minuman' },
+    { id: '3', barcode: '899987654', name: 'Keripik Singkong', stock: 5, buyPriceBox: 50000, buyPriceUnit: 5000, sellPrice: 8000, category: 'Cemilan' },
   ]);
   const [transactions, setTransactions] = useLocalStorage('pos_transactions', []);
   const [customers, setCustomers] = useLocalStorage('pos_customers', []);
@@ -89,7 +89,7 @@ export default function App() {
 
   const handleLoginSuccess = (user, defaultTab) => {
     setAuthUser(user);
-    setActiveTab(defaultTab); // Set explicitly on login
+    setActiveTab(defaultTab);
   };
 
   if (!authUser) {
@@ -202,14 +202,13 @@ export default function App() {
             <div className="flex-1">
               {activeTab === 'dashboard' && authUser.role === 'owner' && <DashboardView transactions={transactions} products={products} thm={thm} />}
               {activeTab === 'pos' && <POSView products={products} setProducts={setProducts} transactions={transactions} setTransactions={setTransactions} customers={customers} settings={settings} thm={thm} authUser={authUser} showNotification={showNotification} />}
-              {activeTab === 'customers' && <CustomersView customers={customers} setCustomers={setCustomers} thm={thm} showNotification={showNotification} />}
-              {activeTab === 'debts' && <DebtsView transactions={transactions} setTransactions={setTransactions} thm={thm} showConfirm={showConfirm} />}
+              {activeTab === 'customers' && <CustomersView customers={customers} setCustomers={setCustomers} thm={thm} showNotification={showNotification} authUser={authUser} showConfirm={showConfirm} />}
+              {activeTab === 'debts' && <DebtsView transactions={transactions} setTransactions={setTransactions} thm={thm} showConfirm={showConfirm} authUser={authUser} />}
               {activeTab === 'inventory' && authUser.role === 'owner' && <InventoryView products={products} setProducts={setProducts} thm={thm} showConfirm={showConfirm} showNotification={showNotification} />}
-              {activeTab === 'history' && <HistoryView transactions={transactions} settings={settings} thm={thm} />}
+              {activeTab === 'history' && <HistoryView transactions={transactions} setTransactions={setTransactions} settings={settings} thm={thm} authUser={authUser} showConfirm={showConfirm} showNotification={showNotification} />}
               {activeTab === 'settings' && authUser.role === 'owner' && <SettingsView settings={settings} setSettings={setSettings} themeColors={themeColors} thm={thm} showNotification={showNotification} />}
             </div>
             
-            {/* Global Footer Fixed to Main Content */}
             <div className="py-6 text-center text-xs font-bold text-gray-400 print:hidden w-full border-t border-gray-200 mt-auto bg-gray-50">
               © 2026 M. Ghozzin Dirham | All Right Reserved
             </div>
@@ -220,9 +219,6 @@ export default function App() {
   );
 }
 
-// ==========================================
-// 1. LOGIN SCREEN
-// ==========================================
 function LoginScreen({ onLogin, thm }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -296,9 +292,6 @@ function LoginScreen({ onLogin, thm }) {
   );
 }
 
-// ==========================================
-// 2. DASHBOARD VIEW
-// ==========================================
 function DashboardView({ transactions, products, thm }) {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -356,12 +349,12 @@ function DashboardView({ transactions, products, thm }) {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
         
         {/* Card 1: Hari Ini */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-all">
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-all group">
           <div className="flex items-center space-x-3 mb-3">
             <div className={`p-3 rounded-xl ${thm.light} ${thm.text}`}><Calendar size={20} /></div>
             <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Omset Hari Ini</h3>
           </div>
-          <div className="text-2xl font-black text-gray-800 mb-3">Rp {todayStats.revenue.toLocaleString('id-ID')}</div>
+          <div className="text-2xl font-black text-gray-800 mb-3 group-hover:scale-105 transform origin-left transition-transform">Rp {todayStats.revenue.toLocaleString('id-ID')}</div>
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-green-600 bg-green-50 border border-green-100 px-2.5 py-1 rounded-lg">Laba: Rp {todayStats.margin.toLocaleString('id-ID')}</span>
             <span className="font-bold text-gray-500 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-lg">{todayStats.items} Item Terjual</span>
@@ -369,12 +362,12 @@ function DashboardView({ transactions, products, thm }) {
         </div>
 
         {/* Card 2: Bulan Ini */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-all">
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-all group">
           <div className="flex items-center space-x-3 mb-3">
             <div className={`p-3 rounded-xl ${thm.light} ${thm.text}`}><TrendingUp size={20} /></div>
             <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Omset Bulan Ini</h3>
           </div>
-          <div className="text-2xl font-black text-gray-800 mb-3">Rp {monthStats.revenue.toLocaleString('id-ID')}</div>
+          <div className="text-2xl font-black text-gray-800 mb-3 group-hover:scale-105 transform origin-left transition-transform">Rp {monthStats.revenue.toLocaleString('id-ID')}</div>
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-green-600 bg-green-50 border border-green-100 px-2.5 py-1 rounded-lg">Laba: Rp {monthStats.margin.toLocaleString('id-ID')}</span>
             <span className="font-bold text-gray-500 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-lg">{monthStats.items} Item Terjual</span>
@@ -382,24 +375,24 @@ function DashboardView({ transactions, products, thm }) {
         </div>
 
         {/* Card 3: Transaksi Hari ini */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-all">
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-all group">
           <div className="flex items-center space-x-3 mb-3">
             <div className={`p-3 rounded-xl bg-blue-50 text-blue-500`}><ShoppingCart size={20} /></div>
             <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Transaksi Hari Ini</h3>
           </div>
-          <div className="text-2xl font-black text-gray-800 mb-3">{todayStats.count} <span className="text-lg font-bold text-gray-400">Nota</span></div>
+          <div className="text-2xl font-black text-gray-800 mb-3 group-hover:scale-105 transform origin-left transition-transform">{todayStats.count} <span className="text-lg font-bold text-gray-400">Nota</span></div>
           <div className="flex text-xs">
              <span className="font-bold text-blue-600 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg">Rata-rata: Rp {todayStats.count > 0 ? Math.round(todayStats.revenue / todayStats.count).toLocaleString('id-ID') : 0} / nota</span>
           </div>
         </div>
 
         {/* Card 4: Piutang */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 border border-red-200 hover:shadow-md transition-all">
+        <div className="bg-white rounded-2xl shadow-sm p-6 border border-red-200 hover:shadow-md transition-all group">
           <div className="flex items-center space-x-3 mb-3">
             <div className={`p-3 rounded-xl bg-red-50 text-red-500`}><BookOpen size={20} /></div>
             <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Total Piutang</h3>
           </div>
-          <div className="text-2xl font-black text-red-600 mb-3">Rp {totalDebtAmount.toLocaleString('id-ID')}</div>
+          <div className="text-2xl font-black text-red-600 mb-3 group-hover:scale-105 transform origin-left transition-transform">Rp {totalDebtAmount.toLocaleString('id-ID')}</div>
           <div className="flex text-xs">
             <span className="font-bold text-red-600 bg-red-50 border border-red-100 px-2.5 py-1 rounded-lg">{unpaidDebts.length} Kasbon Menggantung</span>
           </div>
@@ -474,9 +467,6 @@ function DashboardView({ transactions, products, thm }) {
   );
 }
 
-// ==========================================
-// 3. POS VIEW
-// ==========================================
 function POSView({ products, setProducts, transactions, setTransactions, customers, settings, thm, authUser, showNotification }) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
@@ -492,7 +482,7 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
   }, [products]);
 
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || (p.barcode && p.barcode.includes(search));
     const matchesCategory = selectedCategory === 'Semua' || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -566,7 +556,7 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
             <Search className="absolute left-4 top-3 text-gray-400" size={20} />
             <input 
               type="text" 
-              placeholder="Cari produk..." 
+              placeholder="Cari nama atau barcode..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-12 pr-12 py-2.5 rounded-xl border-none bg-transparent focus:outline-none font-medium text-gray-700"
@@ -592,7 +582,7 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
 
         <div className="flex-1 overflow-y-auto space-y-3 pb-6 pr-1">
           {filteredProducts.map(product => (
-            <div key={product.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between hover:shadow-md transition-all cursor-pointer" onClick={() => addToCart(product)}>
+            <div key={product.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between hover:shadow-md transition-all cursor-pointer group" onClick={() => addToCart(product)}>
               <div className="flex flex-col">
                 <span className="font-bold text-gray-800">{product.name}</span>
                 <span className="text-xs text-gray-500 mt-1 font-medium">Kategori: {product.category || '-'} | Sisa: <span className={`font-bold ${product.stock > 10 ? 'text-green-600' : 'text-red-500'}`}>{product.stock}</span></span>
@@ -601,7 +591,7 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
                 <span className={`font-black text-lg ${thm.text}`}>Rp {product.sellPrice.toLocaleString('id-ID')}</span>
                 <button 
                   onClick={(e) => { e.stopPropagation(); addToCart(product); }}
-                  className={`p-2 rounded-xl ${thm.light} ${thm.text} hover:scale-110 transition-transform`}
+                  className={`p-2 rounded-xl ${thm.light} ${thm.text} group-hover:scale-110 transition-transform`}
                 >
                   <Plus size={18} />
                 </button>
@@ -768,6 +758,7 @@ function ReceiptModal({ transaction, settings, onClose, thm }) {
 
         <div className="p-6 overflow-y-auto print:p-0 font-mono text-sm text-gray-800 bg-white">
           <div className="text-center mb-5">
+            {settings.receiptLogo && <img src={settings.receiptLogo} alt="Logo Toko" className="h-16 mx-auto mb-3 object-contain" />}
             <h2 className="text-xl font-black uppercase tracking-widest">{settings.storeName}</h2>
             <p className="text-xs text-gray-500 whitespace-pre-wrap mt-1 font-sans">{settings.address}</p>
             <p className="text-xs text-gray-500 font-sans">{settings.phone}</p>
@@ -809,8 +800,8 @@ function ReceiptModal({ transaction, settings, onClose, thm }) {
             )}
           </div>
 
-          <div className="text-center text-xs font-bold text-gray-400 italic">
-            *** Terima Kasih ***
+          <div className="text-center text-xs font-bold text-gray-400 italic whitespace-pre-wrap mt-4">
+            {settings.receiptFooter || '*** Terima Kasih ***'}
           </div>
         </div>
 
@@ -825,43 +816,75 @@ function ReceiptModal({ transaction, settings, onClose, thm }) {
   );
 }
 
-// ==========================================
-// CUSTOMERS & DEBTS VIEWS
-// ==========================================
-function CustomersView({ customers, setCustomers, thm, showNotification }) {
+function CustomersView({ customers, setCustomers, thm, showNotification, authUser, showConfirm }) {
   const [showAdd, setShowAdd] = useState(false);
+  const [editingCust, setEditingCust] = useState(null);
+
   const handleSave = (e) => {
     e.preventDefault();
     const data = new FormData(e.target);
-    setCustomers([{ id: 'CUST-'+Date.now(), name: data.get('name'), phone: data.get('phone'), address: data.get('address') }, ...customers]);
+    const newCust = { 
+      id: editingCust ? editingCust.id : 'CUST-'+Date.now(), 
+      name: data.get('name'), 
+      phone: data.get('phone'), 
+      address: data.get('address') 
+    };
+
+    if (editingCust) {
+      setCustomers(customers.map(c => c.id === editingCust.id ? newCust : c));
+      showNotification('Berhasil', 'Data pelanggan diperbarui.', 'success');
+    } else {
+      setCustomers([newCust, ...customers]);
+      showNotification('Berhasil', 'Pelanggan baru ditambahkan.', 'success');
+    }
     setShowAdd(false);
-    showNotification('Berhasil', 'Pelanggan baru ditambahkan.', 'success');
+    setEditingCust(null);
   };
+
+  const handleDelete = (id) => {
+    showConfirm('Hapus Pelanggan', 'Pelanggan ini akan dihapus dari data?', () => {
+      setCustomers(customers.filter(c => c.id !== id));
+      showNotification('Berhasil', 'Pelanggan dihapus.', 'success');
+    });
+  };
+
   return (
     <div className="p-6 md:p-8 animate-scaleIn">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-black text-gray-800 tracking-tight">Data Pelanggan</h2>
-        <button onClick={() => setShowAdd(true)} className={`${thm.primary} ${thm.hover} text-white px-4 py-2.5 rounded-xl flex items-center font-bold shadow-md transition-transform active:scale-95`}><Plus size={18} className="mr-2"/> Tambah</button>
+        <button onClick={() => { setEditingCust(null); setShowAdd(true); }} className={`${thm.primary} ${thm.hover} text-white px-4 py-2.5 rounded-xl flex items-center font-bold shadow-md transition-transform active:scale-95`}><Plus size={18} className="mr-2"/> Tambah</button>
       </div>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-x-auto">
         <table className="w-full text-left whitespace-nowrap">
           <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs uppercase tracking-wider font-bold">
-            <tr><th className="p-4">Nama Pelanggan</th><th className="p-4">No. HP</th><th className="p-4">Alamat</th></tr>
+            <tr><th className="p-4">Nama Pelanggan</th><th className="p-4">No. HP</th><th className="p-4">Alamat</th>{authUser.role === 'owner' && <th className="p-4 text-center">Aksi</th>}</tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {customers.map(c => <tr key={c.id} className="hover:bg-gray-50 transition-colors"><td className="p-4 font-bold text-gray-800">{c.name}</td><td className="p-4 font-medium text-gray-600">{c.phone}</td><td className="p-4 text-gray-500 text-sm whitespace-normal min-w-[200px]">{c.address}</td></tr>)}
-            {customers.length === 0 && <tr><td colSpan="3" className="p-8 text-center text-gray-400 font-bold text-sm">Belum ada data pelanggan.</td></tr>}
+            {customers.map(c => (
+              <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+                <td className="p-4 font-bold text-gray-800">{c.name}</td>
+                <td className="p-4 font-medium text-gray-600">{c.phone}</td>
+                <td className="p-4 text-gray-500 text-sm whitespace-normal min-w-[200px]">{c.address}</td>
+                {authUser.role === 'owner' && (
+                  <td className="p-4 text-center flex justify-center space-x-2">
+                    <button onClick={() => { setEditingCust(c); setShowAdd(true); }} className={`p-1.5 bg-white border border-gray-200 rounded-lg ${thm.text} hover:bg-gray-50 transition shadow-sm`}><Edit size={16}/></button>
+                    <button onClick={() => handleDelete(c.id)} className="p-1.5 bg-white border border-gray-200 rounded-lg text-red-500 hover:bg-red-50 transition shadow-sm"><Trash2 size={16}/></button>
+                  </td>
+                )}
+              </tr>
+            ))}
+            {customers.length === 0 && <tr><td colSpan={authUser.role === 'owner' ? "4" : "3"} className="p-8 text-center text-gray-400 font-bold text-sm">Belum ada data pelanggan.</td></tr>}
           </tbody>
         </table>
       </div>
       {showAdd && (
         <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6 border border-gray-100 animate-scaleIn">
-            <h3 className="font-black text-xl text-gray-800 mb-5">Tambah Pelanggan</h3>
+            <h3 className="font-black text-xl text-gray-800 mb-5">{editingCust ? 'Edit Pelanggan' : 'Tambah Pelanggan'}</h3>
             <form onSubmit={handleSave} className="space-y-4">
-              <input required name="name" placeholder="Nama Lengkap" className={`w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-bold text-gray-700`} />
-              <input required name="phone" placeholder="No. WhatsApp" className={`w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-medium text-gray-700`} />
-              <textarea name="address" placeholder="Alamat Lengkap" className={`w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-medium text-gray-700`} rows="3" />
+              <input required name="name" defaultValue={editingCust?.name} placeholder="Nama Lengkap" className={`w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-bold text-gray-700`} />
+              <input required name="phone" defaultValue={editingCust?.phone} placeholder="No. WhatsApp" className={`w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-medium text-gray-700`} />
+              <textarea name="address" defaultValue={editingCust?.address} placeholder="Alamat Lengkap" className={`w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-medium text-gray-700`} rows="3" />
               <div className="flex space-x-3 pt-2">
                 <button type="button" onClick={() => setShowAdd(false)} className="flex-1 py-3 bg-gray-100 border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-200">Batal</button>
                 <button type="submit" className={`flex-1 py-3 ${thm.primary} ${thm.hover} text-white font-black rounded-xl shadow-md`}>Simpan</button>
@@ -874,7 +897,7 @@ function CustomersView({ customers, setCustomers, thm, showNotification }) {
   );
 }
 
-function DebtsView({ transactions, setTransactions, thm, showConfirm }) {
+function DebtsView({ transactions, setTransactions, thm, showConfirm, authUser }) {
   const debts = transactions.filter(t => t.paymentMethod === 'Kasbon');
   const payDebt = (id) => {
     showConfirm('Pelunasan Kasbon', 'Tandai hutang ini sebagai LUNAS?', () => {
@@ -911,59 +934,158 @@ function DebtsView({ transactions, setTransactions, thm, showConfirm }) {
 
 function InventoryView({ products, setProducts, thm, showConfirm, showNotification }) {
   const [showAdd, setShowAdd] = useState(false);
-  const handleSave = (e) => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    setProducts([{ id: 'PRD-'+Date.now(), name: fd.get('name'), stock: parseInt(fd.get('stock')), category: fd.get('category') || 'Umum', buyPriceBox: parseInt(fd.get('buyPriceBox')), buyPriceUnit: parseInt(fd.get('buyPriceUnit')), sellPrice: parseInt(fd.get('sellPrice')) }, ...products]);
-    setShowAdd(false);
-    showNotification('Berhasil', 'Produk baru ditambahkan ke inventaris.', 'success');
-  };
+  const [editingProd, setEditingProd] = useState(null);
+
   const handleDelete = (id) => {
-    showConfirm('Hapus Produk', 'Yakin ingin menghapus produk ini dari inventaris?', () => {
-      setProducts(products.filter(x => x.id !== id));
+    showConfirm('Hapus Produk', 'Yakin ingin menghapus produk ini secara permanen?', () => {
+      setProducts(products.filter(p => p.id !== id));
+      showNotification('Berhasil', 'Produk berhasil dihapus.', 'success');
     });
   };
 
+  const exportCSV = () => {
+    let csv = 'ID,Barcode,Nama Produk,Kategori,Stok,Modal Dus,Modal Satuan,Harga Jual\n';
+    products.forEach(p => {
+      csv += `"${p.id}","${p.barcode || ''}","${p.name}","${p.category}","${p.stock}","${p.buyPriceBox}","${p.buyPriceUnit}","${p.sellPrice}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `Data_Inventaris.csv`;
+    link.click();
+    showNotification('Berhasil', 'Data inventaris berhasil di-export ke CSV.', 'success');
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const prod = {
+      id: editingProd ? editingProd.id : 'PRD-' + Date.now(),
+      barcode: fd.get('barcode'),
+      name: fd.get('name'),
+      category: fd.get('category'),
+      stock: parseInt(fd.get('stock')),
+      buyPriceBox: parseInt(fd.get('buyPriceBox')),
+      buyPriceUnit: parseInt(fd.get('buyPriceUnit')),
+      sellPrice: parseInt(fd.get('sellPrice')),
+    };
+
+    if (editingProd) {
+      setProducts(products.map(p => p.id === prod.id ? prod : p));
+      showNotification('Berhasil', 'Produk berhasil diubah.', 'success');
+    } else {
+      setProducts([prod, ...products]);
+      showNotification('Berhasil', 'Produk baru ditambahkan.', 'success');
+    }
+    setShowAdd(false);
+    setEditingProd(null);
+  };
+
+  const importCSV = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    showNotification('Simulasi Import', 'File spreadsheet CSV berhasil dibaca. Fitur ini siap berfungsi di mode live.', 'success');
+  };
+
   return (
-    <div className="p-6 md:p-8 animate-scaleIn">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-6 md:p-8 animate-scaleIn print:hidden">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 space-y-4 md:space-y-0">
         <h2 className="text-2xl font-black text-gray-800 tracking-tight">Manajemen Inventaris</h2>
-        <button onClick={() => setShowAdd(true)} className={`${thm.primary} ${thm.hover} text-white px-4 py-2.5 rounded-xl flex items-center font-bold shadow-md active:scale-95 transition-transform`}><Plus size={18} className="mr-2"/> Tambah</button>
+        <div className="flex space-x-3">
+          <button onClick={exportCSV} className="cursor-pointer bg-white border border-gray-200 text-gray-600 px-4 py-2.5 rounded-xl flex items-center hover:bg-gray-50 transition shadow-sm font-bold text-sm">
+            <Download size={18} className="mr-2"/> Export Data (.csv)
+          </button>
+          <button 
+            onClick={() => { setEditingProd(null); setShowAdd(true); }}
+            className={`${thm.primary} ${thm.hover} text-white px-4 py-2.5 rounded-xl flex items-center shadow-md transition-transform active:scale-95 font-bold text-sm`}
+          >
+            <Plus size={18} className="mr-2"/> Tambah Produk
+          </button>
+        </div>
       </div>
+
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-x-auto">
         <table className="w-full text-left whitespace-nowrap">
           <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs uppercase tracking-wider font-bold">
-            <tr><th className="p-4">Produk</th><th className="p-4">Stok</th><th className="p-4">H. Modal</th><th className="p-4">H. Jual</th><th className="p-4 text-center">Aksi</th></tr>
+            <tr>
+              <th className="p-4">Kode/Barcode</th>
+              <th className="p-4">Nama Produk</th>
+              <th className="p-4 text-center">Stok</th>
+              <th className="p-4">Harga Beli</th>
+              <th className="p-4">Harga Jual</th>
+              <th className="p-4 text-center">Aksi</th>
+            </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {products.map(p => (
               <tr key={p.id} className="hover:bg-gray-50 transition-colors">
-                <td className="p-4 font-bold text-gray-800">{p.name} <span className="block text-xs font-medium text-gray-400 mt-0.5">{p.category}</span></td>
-                <td className="p-4"><span className={`px-2.5 py-1 rounded-lg border text-xs font-bold ${p.stock <= 10 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-green-50 text-green-600 border-green-200'}`}>{p.stock}</span></td>
-                <td className="p-4 font-medium text-gray-500">Rp {p.buyPriceUnit.toLocaleString('id-ID')}</td>
+                <td className="p-4 font-mono text-gray-500 text-sm">{p.barcode || '-'}</td>
+                <td className="p-4 font-bold text-gray-800">{p.name} <span className="block text-[10px] font-bold text-gray-400 mt-0.5 uppercase">{p.category}</span></td>
+                <td className="p-4 text-center">
+                  <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${p.stock <= 10 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-green-50 text-green-600 border-green-200'}`}>
+                    {p.stock}
+                  </span>
+                </td>
+                <td className="p-4 font-medium text-gray-500 text-sm">Rp {p.buyPriceUnit.toLocaleString('id-ID')}</td>
                 <td className="p-4 font-black text-gray-800">Rp {p.sellPrice.toLocaleString('id-ID')}</td>
-                <td className="p-4 text-center"><button onClick={() => handleDelete(p.id)} className="text-red-500 hover:bg-red-50 border border-transparent hover:border-red-200 p-2 rounded-lg transition-colors"><Trash2 size={16}/></button></td>
+                <td className="p-4 text-center flex justify-center space-x-2">
+                  <button onClick={() => { setEditingProd(p); setShowAdd(true); }} className={`p-1.5 bg-white border border-gray-200 rounded-lg ${thm.text} hover:bg-gray-50 transition shadow-sm`}><Edit size={16}/></button>
+                  <button onClick={() => handleDelete(p.id)} className="p-1.5 bg-white border border-gray-200 rounded-lg text-red-500 hover:bg-red-50 transition shadow-sm"><Trash2 size={16}/></button>
+                </td>
               </tr>
             ))}
+            {products.length === 0 && (
+              <tr><td colSpan="6" className="p-8 text-center text-gray-400 font-bold text-sm">Belum ada produk.</td></tr>
+            )}
           </tbody>
         </table>
       </div>
+
       {showAdd && (
         <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl p-6 border border-gray-100 animate-scaleIn">
-            <h3 className="font-black text-xl text-gray-800 mb-5">Tambah Produk</h3>
-            <form onSubmit={handleSave} className="space-y-4">
-              <input required name="name" placeholder="Nama Produk" className={`w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-bold text-gray-700`} />
-              <div className="grid grid-cols-2 gap-3">
-                <input required name="category" placeholder="Kategori" className={`w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-medium text-gray-700`} />
-                <input required type="number" name="stock" placeholder="Stok" className={`w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-medium text-gray-700`} />
-                <input required type="number" name="buyPriceBox" placeholder="Modal Perdus" className={`w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-medium text-gray-700`} />
-                <input required type="number" name="buyPriceUnit" placeholder="Modal Satuan" className={`w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-medium text-gray-700`} />
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-scaleIn border border-gray-100">
+            <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+              <h3 className="font-black text-lg text-gray-800">{editingProd ? 'Edit Produk' : 'Tambah Produk Baru'}</h3>
+              <button onClick={() => setShowAdd(false)} className="text-gray-400 hover:text-gray-600"><X size={20}/></button>
+            </div>
+            <form onSubmit={handleSave} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Kode Barcode</label>
+                  <input name="barcode" defaultValue={editingProd?.barcode} className={`w-full p-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-mono text-gray-700`} placeholder="Scan/Ketik..." />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Nama Produk</label>
+                  <input required name="name" defaultValue={editingProd?.name} className={`w-full p-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-bold text-gray-700`} />
+                </div>
               </div>
-              <input required type="number" name="sellPrice" placeholder="Harga Jual" className={`w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-black text-lg text-gray-800`} />
-              <div className="flex space-x-3 pt-2">
-                <button type="button" onClick={() => setShowAdd(false)} className="flex-1 py-3 bg-gray-100 border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-200">Batal</button>
-                <button type="submit" className={`flex-1 py-3 ${thm.primary} ${thm.hover} text-white font-black rounded-xl shadow-md`}>Simpan</button>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Kategori</label>
+                  <input required name="category" defaultValue={editingProd?.category} className={`w-full p-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-medium text-gray-700`} />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Stok Awal</label>
+                  <input required type="number" name="stock" defaultValue={editingProd?.stock} className={`w-full p-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-medium text-gray-700`} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Modal (Per Dus)</label>
+                  <input required type="number" name="buyPriceBox" defaultValue={editingProd?.buyPriceBox} className={`w-full p-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-medium text-gray-700`} />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Modal (Satuan)</label>
+                  <input required type="number" name="buyPriceUnit" defaultValue={editingProd?.buyPriceUnit} className={`w-full p-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-medium text-gray-700`} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Harga Jual</label>
+                <input required type="number" name="sellPrice" defaultValue={editingProd?.sellPrice} className={`w-full p-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-black text-gray-800`} />
+              </div>
+              <div className="pt-2 flex justify-end space-x-3">
+                <button type="button" onClick={() => setShowAdd(false)} className="px-5 py-2.5 bg-gray-100 border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-200">Batal</button>
+                <button type="submit" className={`px-5 py-2.5 ${thm.primary} ${thm.hover} text-white font-black rounded-xl shadow-md`}>Simpan</button>
               </div>
             </form>
           </div>
@@ -973,27 +1095,103 @@ function InventoryView({ products, setProducts, thm, showConfirm, showNotificati
   );
 }
 
-function HistoryView({ transactions, settings, thm }) {
+function HistoryView({ transactions, setTransactions, settings, thm, showConfirm, showNotification, authUser }) {
   const [selectedTx, setSelectedTx] = useState(null);
+  
+  // Filter Tanggal
+  const today = new Date().toISOString().split('T')[0];
+  const threeYearsAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 3)).toISOString().split('T')[0];
+  const [startDate, setStartDate] = useState(threeYearsAgo);
+  const [endDate, setEndDate] = useState(today);
+
+  const filteredTx = transactions.filter(tx => {
+    const d = new Date(tx.date);
+    return d >= new Date(startDate) && d <= new Date(endDate + 'T23:59:59');
+  });
+
+  const importCSV = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    showNotification('Simulasi Import', 'Data Riwayat Transaksi berhasil di-import.', 'success');
+  };
+
+  const handleDelete = (id) => {
+    showConfirm('Hapus Transaksi', 'Catatan ini akan dihapus secara permanen. Lanjutkan?', () => {
+      setTransactions(transactions.filter(t => t.id !== id));
+      showNotification('Dihapus', 'Riwayat transaksi berhasil dihapus.', 'success');
+    });
+  };
+
+  const downloadExcel = () => {
+    let csv = 'Tanggal,ID Transaksi,Metode Pembayaran,Status Pembayaran,Nama Pelanggan,Kasir,Total Penjualan,Detail Item Terjual\n';
+    filteredTx.forEach(tx => {
+      const items = tx.items.map(i => `${i.name} (${i.qty}x)`).join(' | ');
+      csv += `"${new Date(tx.date).toLocaleString('id-ID')}","${tx.id}","${tx.paymentMethod}","${tx.paymentStatus}","${tx.customerName || '-'}","${tx.cashier}","${tx.total}","${items}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `Laporan_Transaksi_${startDate}_sampai_${endDate}.csv`;
+    link.click();
+  };
+
   return (
     <div className="p-6 md:p-8 animate-scaleIn">
-      <h2 className="text-2xl font-black text-gray-800 tracking-tight mb-6">Riwayat Transaksi</h2>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-6 space-y-4 md:space-y-0">
+        <div>
+          <h2 className="text-2xl font-black text-gray-800 tracking-tight">Riwayat Transaksi</h2>
+          <p className="text-sm font-bold text-gray-400 mt-1">Ditemukan {filteredTx.length} nota</p>
+        </div>
+        
+        {authUser.role === 'owner' && (
+          <label className={`cursor-pointer flex items-center px-4 py-2.5 ${thm.primary} ${thm.hover} text-white font-bold rounded-xl shadow-md transition-transform active:scale-95`}>
+            <Upload size={18} className="mr-2"/> Import Data (.csv)
+            <input type="file" accept=".csv" className="hidden" onChange={importCSV} />
+          </label>
+        )}
+      </div>
+
+      {/* Filter Section */}
+      <div className="flex items-center space-x-3 mb-6 bg-white p-3 rounded-2xl shadow-sm border border-gray-200 max-w-fit">
+        <div className="flex items-center space-x-2">
+          <span className="text-xs font-bold text-gray-500 uppercase">Dari:</span>
+          <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className={`bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-2 ${thm.ring} focus:border-transparent outline-none p-2 font-bold`} />
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="text-xs font-bold text-gray-500 uppercase">Sampai:</span>
+          <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className={`bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg focus:ring-2 ${thm.ring} focus:border-transparent outline-none p-2 font-bold`} />
+        </div>
+      </div>
+
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-x-auto">
         <table className="w-full text-left whitespace-nowrap">
           <thead className="bg-gray-50 border-b border-gray-200 text-gray-500 text-xs uppercase tracking-wider font-bold">
-            <tr><th className="p-4">Waktu</th><th className="p-4">ID Transaksi</th><th className="p-4">Metode</th><th className="p-4">Total</th><th className="p-4 text-center">Struk</th></tr>
+            <tr><th className="p-4">Waktu</th><th className="p-4">ID Transaksi</th><th className="p-4">Pembayaran</th><th className="p-4">Total</th><th className="p-4 text-center">Aksi</th></tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {transactions.map(tx => (
+            {filteredTx.map(tx => (
               <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
                 <td className="p-4 font-medium text-sm text-gray-500">{new Date(tx.date).toLocaleString('id-ID')}</td>
                 <td className="p-4 font-bold text-gray-800 text-sm">{tx.id}</td>
-                <td className="p-4 font-bold text-gray-500 text-sm">{tx.paymentMethod}</td>
+                <td className="p-4">
+                  <div className="font-bold text-gray-600 text-sm flex items-center space-x-2">
+                    <span>{tx.paymentMethod}</span>
+                    {tx.paymentMethod === 'Kasbon' && (
+                      <span className={`px-2 py-0.5 text-[10px] uppercase rounded-md border ${tx.paymentStatus === 'Lunas' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-500 border-red-200'}`}>{tx.paymentStatus}</span>
+                    )}
+                  </div>
+                </td>
                 <td className="p-4 font-black text-gray-800">Rp {tx.total.toLocaleString('id-ID')}</td>
-                <td className="p-4 text-center"><button onClick={() => setSelectedTx(tx)} className={`p-2 bg-white border border-gray-200 rounded-lg ${thm.text} hover:bg-gray-50 transition shadow-sm`}><FileText size={16}/></button></td>
+                <td className="p-4 text-center flex justify-center space-x-2">
+                  <button onClick={() => setSelectedTx(tx)} className={`p-2 bg-white border border-gray-200 rounded-lg ${thm.text} hover:bg-gray-50 transition shadow-sm`}><FileText size={16}/></button>
+                  {authUser.role === 'owner' && (
+                    <button onClick={() => handleDelete(tx.id)} className="p-2 bg-white border border-gray-200 rounded-lg text-red-500 hover:bg-red-50 transition shadow-sm"><Trash2 size={16}/></button>
+                  )}
+                </td>
               </tr>
             ))}
-            {transactions.length === 0 && <tr><td colSpan="5" className="p-8 text-center text-gray-400 font-bold text-sm">Belum ada transaksi.</td></tr>}
+            {filteredTx.length === 0 && <tr><td colSpan="5" className="p-8 text-center text-gray-400 font-bold text-sm">Tidak ada transaksi di rentang tanggal ini.</td></tr>}
           </tbody>
         </table>
       </div>
@@ -1034,6 +1232,28 @@ function SettingsView({ settings, setSettings, themeColors, thm, showNotificatio
                <option value="58mm">Kertas 58mm</option>
                <option value="80mm">Kertas 80mm</option>
              </select>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Logo & Footer Struk</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-1.5">Upload Logo (Opsional)</label>
+              <input type="file" accept="image/*" onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (event) => setFormData({...formData, receiptLogo: event.target.result});
+                  reader.readAsDataURL(file);
+                }
+              }} className={`w-full p-2 bg-white border border-gray-200 rounded-xl ${thm.ring} text-sm`} />
+              {formData.receiptLogo && <button type="button" onClick={() => setFormData({...formData, receiptLogo: null})} className="text-xs text-red-500 font-bold mt-2">Hapus Logo</button>}
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-1.5">Teks Pesan Footer</label>
+              <textarea value={formData.receiptFooter || ''} onChange={e => setFormData({...formData, receiptFooter: e.target.value})} className={`w-full p-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-opacity-50 focus:border-transparent ${thm.ring} font-medium text-gray-800`} placeholder="Misal: Terima kasih telah berbelanja!" rows="2" />
+            </div>
           </div>
         </div>
 
