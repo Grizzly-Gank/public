@@ -3,7 +3,7 @@ import {
   Menu, X, Home, ShoppingCart, Package, FileText, Settings as SettingsIcon, 
   LogOut, Plus, Minus, Trash2, Search, ScanLine, Printer, Download,
   Calendar, DollarSign, TrendingUp, CheckCircle, Upload, Users, BookOpen, Eye, EyeOff,
-  Edit
+  Edit, Smartphone
 } from 'lucide-react';
 
 // --- DATABASE & STATE MANAGEMENT (LocalStorage) ---
@@ -35,14 +35,11 @@ const CustomStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
     
-    * {
-      font-family: 'Inter', sans-serif;
-    }
+    * { font-family: 'Inter', sans-serif; }
     
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     
-    /* Smooth entrance animations */
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
@@ -75,11 +72,11 @@ export default function App() {
     themeColor: 'caramel',
     printerType: 'bluetooth',
     paperSize: '58mm',
+    connectedDeviceName: '',
     receiptLogo: null,
     receiptFooter: '*** Terima Kasih ***'
   });
 
-  // Gradient enhanced themes
   const themeColors = {
     caramel: { primary: 'bg-[#867233]', gradient: 'bg-gradient-to-r from-[#867233] to-[#a38c43]', hover: 'hover:bg-[#6b5b29]', text: 'text-[#867233]', light: 'bg-[#f4efe1]', ring: 'focus:ring-[#867233]/40' },
     green: { primary: 'bg-emerald-600', gradient: 'bg-gradient-to-r from-emerald-600 to-teal-500', hover: 'hover:bg-emerald-700', text: 'text-emerald-600', light: 'bg-emerald-50', ring: 'focus:ring-emerald-500/40' },
@@ -104,11 +101,8 @@ export default function App() {
     }
   }, [authUser, activeTab]);
 
-  if (!authUser) {
-    return <><CustomStyles/><LoginScreen onLogin={(user) => setAuthUser(user)} thm={thm} /></>;
-  }
+  if (!authUser) return <><CustomStyles/><LoginScreen onLogin={(user) => setAuthUser(user)} thm={thm} /></>;
 
-  // Functional Icon Colors for Sidebar
   const navItems = [
     { id: 'dashboard', icon: <Home size={20} className={activeTab === 'dashboard' ? 'text-white' : 'text-blue-500'}/>, label: 'Dashboard', roles: ['owner'] },
     { id: 'pos', icon: <ShoppingCart size={20} className={activeTab === 'pos' ? 'text-white' : 'text-emerald-500'}/>, label: 'Mesin Kasir (POS)', roles: ['owner', 'cashier'] },
@@ -226,38 +220,19 @@ function LoginScreen({ onLogin, thm }) {
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Username</label>
-            <input 
-              type="text" 
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className={`w-full p-4 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-inner`}
-              placeholder="Masukkan username"
-            />
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className={`w-full p-4 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-inner`} placeholder="Masukkan username" />
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Kata Sandi</label>
             <div className="relative">
-              <input 
-                type={showPassword ? 'text' : 'password'} 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`w-full p-4 pr-12 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-inner`}
-                placeholder="Masukkan sandi"
-              />
-              <button 
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors"
-              >
+              <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className={`w-full p-4 pr-12 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-inner`} placeholder="Masukkan sandi" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors">
                 {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
               </button>
             </div>
           </div>
           {error && <p className="text-rose-500 text-sm font-bold text-center bg-rose-50 border border-rose-100 py-3 rounded-2xl animate-fadeInUp">{error}</p>}
-          <button 
-            type="submit" 
-            className={`w-full ${thm.gradient} text-white font-black text-lg py-4 rounded-2xl shadow-lg shadow-[#867233]/20 transition-all transform hover:-translate-y-1 active:scale-95`}
-          >
+          <button type="submit" className={`w-full ${thm.gradient} text-white font-black text-lg py-4 rounded-2xl shadow-lg shadow-[#867233]/20 transition-all transform hover:-translate-y-1 active:scale-95`}>
             Masuk Sistem
           </button>
         </form>
@@ -290,19 +265,18 @@ function DashboardView({ transactions, products, thm }) {
   const unpaidDebts = transactions.filter(t => t.paymentMethod === 'Kasbon' && t.paymentStatus === 'Belum Lunas');
   const totalDebtAmount = unpaidDebts.reduce((sum, t) => sum + t.total, 0);
 
-  // Line Chart Data Generation (Last 7 days)
+  // Line Chart Data Generation
   const chartData = useMemo(() => {
     const data = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
       const nextD = new Date(d); nextD.setDate(d.getDate() + 1);
       const dayTotal = transactions.filter(t => new Date(t.date) >= d && new Date(t.date) < nextD).reduce((sum, t) => sum + t.total, 0);
-      data.push({ day: d.toLocaleDateString('id-ID', { weekday: 'short' }), date: d.getDate(), total: dayTotal });
+      data.push({ day: d.toLocaleDateString('id-ID', { weekday: 'short' }), total: dayTotal });
     }
     return data;
   }, [transactions]);
 
-  // SVG Chart Calculation
   const maxVal = Math.max(...chartData.map(d => d.total), 100);
   const chartWidth = 600; const chartHeight = 200; const padding = 30;
   
@@ -319,7 +293,6 @@ function DashboardView({ transactions, products, thm }) {
     <div className="p-8 animate-fadeIn print:hidden max-w-7xl mx-auto">
       <h2 className="text-3xl font-black text-gray-800 mb-8 tracking-tight">Ringkasan Bisnis</h2>
       
-      {/* 4 Colorful Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] p-6 border border-gray-100 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all transform hover:-translate-y-1 relative overflow-hidden group">
           <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
@@ -445,8 +418,17 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
   const [showReceipt, setShowReceipt] = useState(false);
   const [lastTransaction, setLastTransaction] = useState(null);
   const [alertMsg, setAlertMsg] = useState('');
+  
+  const [selectedCategory, setSelectedCategory] = useState('Semua');
+  const [showScanner, setShowScanner] = useState(false);
 
-  const filteredProducts = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+  const categories = useMemo(() => ['Semua', ...new Set(products.map(p => p.category).filter(Boolean))], [products]);
+
+  const filteredProducts = products.filter(p => {
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || (p.barcode && p.barcode.includes(search));
+    const matchCategory = selectedCategory === 'Semua' || p.category === selectedCategory;
+    return matchSearch && matchCategory;
+  });
 
   const addToCart = (product) => {
     if (product.stock <= 0) { setAlertMsg(`Stok ${product.name} habis!`); return; }
@@ -503,7 +485,7 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
   };
 
   return (
-    <div className="flex h-full print:block print:h-auto animate-fadeIn">
+    <div className="flex h-full print:block print:h-auto animate-fadeIn relative">
       <div className="flex-1 flex flex-col print:hidden p-4 space-y-4 max-w-5xl mx-auto">
         <div className="bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem] p-3 flex items-center space-x-2 border border-gray-100">
           <div className="relative flex-1">
@@ -514,11 +496,21 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-14 pr-14 py-4 rounded-2xl bg-gray-50 hover:bg-gray-100 focus:bg-white focus:ring-2 border-none transition-all outline-none font-bold text-gray-700 text-lg shadow-inner"
+              style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}
             />
-            <button className={`absolute right-3 top-2 p-2 rounded-xl ${thm.light} ${thm.text} hover:opacity-80 transition transform hover:scale-105`}>
+            <button onClick={() => setShowScanner(true)} className={`absolute right-3 top-2 p-2 rounded-xl ${thm.light} ${thm.text} hover:opacity-80 transition transform hover:scale-105`}>
               <ScanLine size={24} />
             </button>
           </div>
+        </div>
+
+        {/* Category Pills Filter */}
+        <div className="flex space-x-2 overflow-x-auto hide-scrollbar py-1">
+          {categories.map(cat => (
+             <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-5 py-2.5 rounded-full whitespace-nowrap text-sm font-bold transition-all shadow-sm border ${selectedCategory === cat ? thm.gradient + ' text-white border-transparent' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'}`}>
+               {cat}
+             </button>
+          ))}
         </div>
 
         <div className="flex-1 overflow-auto space-y-4 pb-20 px-2 hide-scrollbar">
@@ -542,6 +534,7 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
               </div>
             </div>
           ))}
+          {filteredProducts.length === 0 && <div className="text-center p-10 text-gray-400 font-bold">Produk tidak ditemukan.</div>}
         </div>
       </div>
 
@@ -599,8 +592,8 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
 
       {showCheckout && <CheckoutModal subtotal={subtotal} customers={customers} onClose={() => setShowCheckout(false)} onProcess={processCheckout} thm={thm} />}
       {showReceipt && <ReceiptModal transaction={lastTransaction} settings={settings} onClose={() => setShowReceipt(false)} thm={thm} />}
+      {showScanner && <BarcodeScannerModal onClose={() => setShowScanner(false)} onScan={(text) => { setSearch(text); setShowScanner(false); }} />}
 
-      {/* Elegant Alert Modal */}
       {alertMsg && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm rounded-[2.5rem]"></div>
@@ -637,7 +630,7 @@ function CheckoutModal({ subtotal, customers, onClose, onProcess, thm }) {
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:hidden animate-fadeIn">
-      <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl animate-fadeInUp border border-white">
+      <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl animate-fadeInUp border border-white relative z-10">
         <div className={`p-10 ${thm.gradient} text-white text-center relative overflow-hidden`}>
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl transform translate-x-10 -translate-y-10"></div>
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/10 rounded-full blur-2xl transform -translate-x-10 translate-y-10"></div>
@@ -700,7 +693,7 @@ function CheckoutModal({ subtotal, customers, onClose, onProcess, thm }) {
       {alertMsg && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm rounded-[2.5rem]"></div>
-          <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full text-center relative z-10 animate-scaleIn shadow-2xl border border-white">
+          <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full text-center relative z-20 animate-scaleIn shadow-2xl border border-white">
             <div className="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4"><ShoppingCart size={30} /></div>
             <h3 className="font-black text-gray-800 mb-2">Informasi</h3>
             <p className="text-sm text-gray-500 font-medium mb-6">{alertMsg}</p>
@@ -858,7 +851,6 @@ function CustomersView({ customers, setCustomers, thm, authUser }) {
         </div>
       )}
 
-      {/* Elegant Confirm Modal */}
       {confirmData && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl animate-scaleIn border border-white">
@@ -915,7 +907,6 @@ function DebtsView({ transactions, setTransactions, thm }) {
         </table>
       </div>
 
-      {/* Elegant Confirm Modal */}
       {confirmData && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl animate-scaleIn border border-white">
@@ -965,9 +956,7 @@ function InventoryView({ products, setProducts, thm }) {
       const text = event.target.result;
       const rows = text.split('\n').map(row => row.trim()).filter(row => row);
       const newProducts = [];
-      // Start loop from 1 to skip header row
       for (let i = 1; i < rows.length; i++) {
-        // Simple comma split
         const cols = rows[i].split(',');
         if (cols.length >= 6) {
           newProducts.push({
@@ -976,13 +965,12 @@ function InventoryView({ products, setProducts, thm }) {
             name: cols[1].trim(),
             category: cols[2].trim(),
             stock: parseInt(cols[3].trim()) || 0,
-            buyPriceBox: parseInt(cols[4].trim()) || 0, // Fallback logic
+            buyPriceBox: parseInt(cols[4].trim()) || 0,
             buyPriceUnit: parseInt(cols[4].trim()) || 0,
             sellPrice: parseInt(cols[5].trim()) || 0,
           });
         }
       }
-      
       if(newProducts.length > 0) {
           setProducts(prev => [...newProducts, ...prev]);
           setAlertMsg(`Sukses mengimpor ${newProducts.length} data produk!`);
@@ -991,7 +979,7 @@ function InventoryView({ products, setProducts, thm }) {
       }
     };
     reader.readAsText(file);
-    e.target.value = null; // reset so same file can be uploaded again if needed
+    e.target.value = null; 
   };
 
   return (
@@ -1038,7 +1026,7 @@ function InventoryView({ products, setProducts, thm }) {
             <h3 className="font-black text-2xl text-gray-800 mb-6">{editingProd ? 'Edit Produk' : 'Tambah Produk'}</h3>
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <input name="barcode" defaultValue={editingProd?.barcode} placeholder="Kode Barcode (Opsional)" className="w-full p-4 bg-gray-50 rounded-2xl focus:bg-white focus:ring-4 outline-none font-bold shadow-inner font-mono text-sm" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }} />
+                <input name="barcode" defaultValue={editingProd?.barcode} placeholder="Kode Barcode" className="w-full p-4 bg-gray-50 rounded-2xl focus:bg-white focus:ring-4 outline-none font-bold shadow-inner font-mono text-sm" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }} />
                 <input required name="name" defaultValue={editingProd?.name} placeholder="Nama Produk" className="w-full p-4 bg-gray-50 rounded-2xl focus:bg-white focus:ring-4 outline-none font-bold shadow-inner" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }} />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -1057,7 +1045,6 @@ function InventoryView({ products, setProducts, thm }) {
         </div>
       )}
 
-      {/* Elegant Modals */}
       {alertMsg && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl animate-scaleIn border border-white">
@@ -1175,7 +1162,6 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
       
       {selectedTx && <ReceiptModal transaction={selectedTx} settings={settings} onClose={() => setSelectedTx(null)} thm={thm} />}
 
-      {/* Elegant Confirm Modal */}
       {confirmData && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl animate-scaleIn border border-white">
@@ -1196,6 +1182,19 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
 function SettingsView({ settings, setSettings, themeColors, thm }) {
   const [formData, setFormData] = useState(settings);
   const [alertMsg, setAlertMsg] = useState('');
+
+  const handleConnectBluetooth = async () => {
+    try {
+      const device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true
+      });
+      setFormData({...formData, connectedDeviceName: device.name || 'Printer Bluetooth'});
+      setAlertMsg(`Perangkat ${device.name || 'Printer'} berhasil dipasangkan!`);
+    } catch (error) {
+      console.log(error);
+      setAlertMsg('Pencarian dibatalkan atau perangkat tidak ditemukan.');
+    }
+  };
   
   const handleSubmit = (e) => { 
     e.preventDefault(); 
@@ -1221,10 +1220,26 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
           <div>
             <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-5 flex items-center"><Printer size={16} className="mr-2 text-slate-400"/> Printer Struk</h3>
             <div className="space-y-4">
-               <select value={formData.printerType} onChange={e => setFormData({...formData, printerType: e.target.value})} className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-4 outline-none font-bold text-gray-700 shadow-sm appearance-none" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}>
-                 <option value="bluetooth">Bluetooth Thermal</option>
-                 <option value="usb">USB Printer</option>
-               </select>
+               <div className="flex items-center space-x-3">
+                 <select value={formData.printerType} onChange={e => setFormData({...formData, printerType: e.target.value})} className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-4 outline-none font-bold text-gray-700 shadow-sm appearance-none" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}>
+                   <option value="bluetooth">Bluetooth Thermal</option>
+                   <option value="usb">USB Printer</option>
+                 </select>
+                 {formData.printerType === 'bluetooth' && (
+                   <button type="button" onClick={handleConnectBluetooth} className={`px-5 py-4 rounded-2xl text-white font-black whitespace-nowrap shadow-md hover:-translate-y-0.5 transition-transform ${thm.gradient}`}>
+                     <Smartphone size={20} className="inline mr-2"/> Cari Perangkat
+                   </button>
+                 )}
+               </div>
+               {formData.printerType === 'bluetooth' && (
+                  <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-between shadow-inner">
+                    <div>
+                      <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Status Perangkat</p>
+                      <p className="font-bold text-blue-700 text-sm mt-0.5">{formData.connectedDeviceName || 'Belum ada printer yang dipasangkan'}</p>
+                    </div>
+                    <div className={`w-3 h-3 rounded-full shadow-sm ${formData.connectedDeviceName ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></div>
+                  </div>
+               )}
                <select value={formData.paperSize} onChange={e => setFormData({...formData, paperSize: e.target.value})} className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-4 outline-none font-bold text-gray-700 shadow-sm appearance-none" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}>
                  <option value="58mm">Kertas 58mm</option>
                  <option value="80mm">Kertas 80mm</option>
@@ -1261,17 +1276,57 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
         <button type="submit" className={`w-full py-5 ${thm.gradient} text-white font-black text-lg rounded-2xl shadow-xl hover:-translate-y-1 transform transition-all active:scale-95`}>Simpan Pengaturan</button>
       </form>
 
-      {/* Elegant Success Modal */}
       {alertMsg && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl animate-scaleIn border border-white">
             <div className="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle size={30} /></div>
-            <h3 className="text-xl font-black text-gray-800 mb-2">Sukses</h3>
+            <h3 className="text-xl font-black text-gray-800 mb-2">Pemberitahuan</h3>
             <p className="text-gray-500 font-medium mb-6">{alertMsg}</p>
             <button onClick={() => setAlertMsg('')} className="w-full py-3 bg-gray-100 text-gray-800 font-black rounded-xl hover:bg-gray-200 transition">Tutup</button>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// --- SCANNER COMPONENT (DYNAMIC SCRIPT INJECTION) ---
+function BarcodeScannerModal({ onClose, onScan }) {
+  useEffect(() => {
+    let html5QrcodeScanner;
+    const initScanner = () => {
+      if (window.Html5QrcodeScanner) {
+        html5QrcodeScanner = new window.Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } }, false);
+        html5QrcodeScanner.render((decodedText) => {
+          if (html5QrcodeScanner) html5QrcodeScanner.clear();
+          onScan(decodedText);
+        }, () => {});
+      }
+    };
+
+    if (!window.Html5QrcodeScanner) {
+      const script = document.createElement('script');
+      script.src = "https://unpkg.com/html5-qrcode";
+      script.onload = initScanner;
+      document.body.appendChild(script);
+    } else {
+      initScanner();
+    }
+
+    return () => {
+      if (html5QrcodeScanner) html5QrcodeScanner.clear().catch(e => console.error(e));
+    };
+  }, [onScan]);
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[80] flex items-center justify-center p-4 animate-fadeIn">
+      <div className="bg-white p-6 rounded-[2.5rem] w-full max-w-md shadow-2xl relative border border-white animate-scaleIn">
+        <button onClick={onClose} className="absolute top-5 right-5 text-gray-400 hover:text-gray-800 bg-gray-100 p-2 rounded-xl transition-colors"><X size={20}/></button>
+        <div className="w-16 h-16 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"><ScanLine size={30} /></div>
+        <h3 className="font-black text-xl text-gray-800 mb-6 text-center">Arahkan ke Barcode</h3>
+        <div id="reader" className="w-full overflow-hidden rounded-3xl border-4 border-dashed border-gray-200 bg-gray-50 min-h-[250px]"></div>
+        <p className="text-center text-xs text-gray-400 mt-6 font-bold tracking-wide">Proses scan berjalan otomatis.</p>
+      </div>
     </div>
   );
 }
