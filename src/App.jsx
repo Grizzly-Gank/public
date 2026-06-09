@@ -122,7 +122,7 @@ export default function App() {
   return (
     <>
       <CustomStyles />
-      <div className="flex h-screen bg-gray-50 text-gray-800 overflow-hidden">
+      <div className="flex h-screen bg-[#F8F9FC] text-gray-800 overflow-hidden">
         
         {/* Sidebar */}
         <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
@@ -148,7 +148,7 @@ export default function App() {
             </div>
             <button 
               onClick={() => setAuthUser(null)}
-              className="w-full flex items-center justify-center space-x-2 p-3.5 bg-red-50 text-red-600 hover:bg-red-500 hover:text-white rounded-2xl transition-all font-bold text-sm group"
+              className="w-full flex items-center justify-center space-x-2 p-3.5 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white rounded-2xl transition-all font-bold text-sm group"
             >
               <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
               <span>Keluar Sistem</span>
@@ -160,7 +160,7 @@ export default function App() {
 
         {/* Main Workspace */}
         <div className="flex-1 flex flex-col h-screen overflow-hidden print:bg-white">
-          <header className="bg-white/80 backdrop-blur-md shadow-[0_4px_30px_-5px_rgba(0,0,0,0.03)] h-20 flex items-center justify-between px-6 z-10 print:hidden sticky top-0">
+          <header className="bg-white/80 backdrop-blur-md shadow-[0_4px_30px_-5px_rgba(0,0,0,0.03)] h-20 flex items-center justify-between px-6 z-10 print:hidden sticky top-0 border-b border-gray-100/50">
             <div className="flex items-center space-x-4">
               <button onClick={() => setIsSidebarOpen(true)} className={`p-2.5 rounded-2xl ${thm.light} ${thm.text} hover:opacity-80 transition-colors`}>
                 <Menu size={24} />
@@ -212,7 +212,6 @@ function LoginScreen({ onLogin, thm }) {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#F8F9FC] to-[#E2E8F0] p-4 relative overflow-hidden">
-      {/* Decorative Orbs */}
       <div className={`absolute top-[-10%] left-[-10%] w-96 h-96 ${thm.primary} opacity-10 rounded-full blur-3xl`}></div>
       <div className={`absolute bottom-[-10%] right-[-10%] w-96 h-96 ${thm.primary} opacity-10 rounded-full blur-3xl`}></div>
 
@@ -322,7 +321,6 @@ function DashboardView({ transactions, products, thm }) {
       
       {/* 4 Colorful Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-        {/* Card 1: Today */}
         <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] p-6 border border-gray-100 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all transform hover:-translate-y-1 relative overflow-hidden group">
           <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
           <div className="relative z-10">
@@ -335,7 +333,6 @@ function DashboardView({ transactions, products, thm }) {
           </div>
         </div>
 
-        {/* Card 2: Month */}
         <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] p-6 border border-gray-100 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all transform hover:-translate-y-1 relative overflow-hidden group">
           <div className="absolute -right-6 -top-6 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
           <div className="relative z-10">
@@ -348,7 +345,6 @@ function DashboardView({ transactions, products, thm }) {
           </div>
         </div>
 
-        {/* Card 3: Transactions */}
         <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] p-6 border border-gray-100 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all transform hover:-translate-y-1 relative overflow-hidden group">
           <div className="absolute -right-6 -top-6 w-24 h-24 bg-purple-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
           <div className="relative z-10">
@@ -361,7 +357,6 @@ function DashboardView({ transactions, products, thm }) {
           </div>
         </div>
 
-        {/* Card 4: Debts */}
         <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] p-6 border border-rose-100 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all transform hover:-translate-y-1 relative overflow-hidden group">
           <div className="absolute -right-6 -top-6 w-24 h-24 bg-rose-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
           <div className="relative z-10">
@@ -376,7 +371,6 @@ function DashboardView({ transactions, products, thm }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* SVG Line Chart Area */}
         <div className="lg:col-span-2 bg-white rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] p-8 border border-gray-100">
           <h3 className="text-lg font-black text-gray-800 mb-6 flex items-center"><TrendingUp size={22} className="mr-2 text-indigo-500"/> Pertumbuhan Penjualan (7 Hari)</h3>
           <div className="w-full overflow-x-auto hide-scrollbar">
@@ -387,16 +381,13 @@ function DashboardView({ transactions, products, thm }) {
                   <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.0"/>
                 </linearGradient>
               </defs>
-              {/* Grid Lines */}
               <line x1={padding} y1={padding} x2={chartWidth-padding} y2={padding} stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4"/>
               <line x1={padding} y1={(chartHeight)/2} x2={chartWidth-padding} y2={(chartHeight)/2} stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4"/>
               <line x1={padding} y1={chartHeight-padding} x2={chartWidth-padding} y2={chartHeight-padding} stroke="#e2e8f0" strokeWidth="2"/>
               
-              {/* Chart Path Area & Line */}
               <path d={areaD} fill="url(#gradientArea)" />
               <path d={pathD} fill="none" stroke="#4f46e5" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
               
-              {/* Data Points & Labels */}
               {points.map((p, i) => (
                 <g key={i} className="group cursor-pointer">
                   <circle cx={p.x} cy={p.y} r="6" fill="#ffffff" stroke="#4f46e5" strokeWidth="3" className="transition-all duration-300 group-hover:r-8 group-hover:fill-indigo-100"/>
@@ -408,7 +399,6 @@ function DashboardView({ transactions, products, thm }) {
           </div>
         </div>
 
-        {/* Warnings Sidebar */}
         <div className="space-y-6">
           <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] p-6 border border-gray-100 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-2 h-full bg-amber-400"></div>
@@ -454,11 +444,12 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
   const [showCheckout, setShowCheckout] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
   const [lastTransaction, setLastTransaction] = useState(null);
+  const [alertMsg, setAlertMsg] = useState('');
 
   const filteredProducts = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
 
   const addToCart = (product) => {
-    if (product.stock <= 0) return alert('Stok habis!');
+    if (product.stock <= 0) { setAlertMsg(`Stok ${product.name} habis!`); return; }
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
@@ -559,7 +550,7 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
           <h2 className="text-2xl font-black text-gray-800 tracking-tight flex items-center"><ShoppingCart size={24} className="mr-3 text-emerald-500"/> Pesanan</h2>
           {cart.length > 0 && (
             <button onClick={() => setCart([])} className="text-rose-500 text-sm font-black flex items-center hover:bg-rose-50 px-4 py-2 rounded-xl transition-colors border border-transparent hover:border-rose-100">
-              <Trash2 size={16} className="mr-2"/> Hapus Semua
+              <Trash2 size={16} className="mr-2"/> Hapus
             </button>
           )}
         </div>
@@ -608,6 +599,19 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
 
       {showCheckout && <CheckoutModal subtotal={subtotal} customers={customers} onClose={() => setShowCheckout(false)} onProcess={processCheckout} thm={thm} />}
       {showReceipt && <ReceiptModal transaction={lastTransaction} settings={settings} onClose={() => setShowReceipt(false)} thm={thm} />}
+
+      {/* Elegant Alert Modal */}
+      {alertMsg && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm rounded-[2.5rem]"></div>
+          <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full text-center relative z-10 animate-scaleIn shadow-2xl border border-white">
+            <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4"><Package size={30} /></div>
+            <h3 className="font-black text-gray-800 mb-2">Peringatan</h3>
+            <p className="text-sm text-gray-500 font-medium mb-6">{alertMsg}</p>
+            <button onClick={() => setAlertMsg('')} className="w-full py-3 bg-gray-100 text-gray-600 font-black rounded-xl hover:bg-gray-200 transition-colors">Tutup</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -616,16 +620,17 @@ function CheckoutModal({ subtotal, customers, onClose, onProcess, thm }) {
   const [cash, setCash] = useState('');
   const [method, setMethod] = useState('Tunai');
   const [selectedCustomer, setSelectedCustomer] = useState('');
+  const [alertMsg, setAlertMsg] = useState('');
 
   const handleProcess = () => {
     if (method === 'Tunai') {
       const cashVal = parseInt(cash.replace(/\D/g, '')) || 0;
-      if (cashVal < subtotal) { alert('Uang kurang!'); return; }
+      if (cashVal < subtotal) { setAlertMsg('Uang pelanggan kurang dari tagihan!'); return; }
       onProcess({ method, cash: cashVal, change: cashVal - subtotal, customerName: '-' });
     } else if (method === 'QRIS') {
       onProcess({ method, cash: subtotal, change: 0, customerName: '-' });
     } else if (method === 'Kasbon') {
-      if (!selectedCustomer) { alert('Pilih pelanggan untuk kasbon!'); return; }
+      if (!selectedCustomer) { setAlertMsg('Pilih nama pelanggan untuk kasbon!'); return; }
       onProcess({ method, cash: 0, change: 0, customerName: selectedCustomer });
     }
   };
@@ -691,6 +696,18 @@ function CheckoutModal({ subtotal, customers, onClose, onProcess, thm }) {
           </div>
         </div>
       </div>
+
+      {alertMsg && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm rounded-[2.5rem]"></div>
+          <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full text-center relative z-10 animate-scaleIn shadow-2xl border border-white">
+            <div className="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4"><ShoppingCart size={30} /></div>
+            <h3 className="font-black text-gray-800 mb-2">Informasi</h3>
+            <p className="text-sm text-gray-500 font-medium mb-6">{alertMsg}</p>
+            <button onClick={() => setAlertMsg('')} className="w-full py-3 bg-gray-100 text-gray-600 font-black rounded-xl hover:bg-gray-200 transition-colors">Tutup</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -770,6 +787,7 @@ function ReceiptModal({ transaction, settings, onClose, thm }) {
 function CustomersView({ customers, setCustomers, thm, authUser }) {
   const [showAdd, setShowAdd] = useState(false);
   const [editingCust, setEditingCust] = useState(null);
+  const [confirmData, setConfirmData] = useState(null);
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -782,8 +800,15 @@ function CustomersView({ customers, setCustomers, thm, authUser }) {
     }
     setShowAdd(false); setEditingCust(null);
   };
+
   const handleDelete = (id) => {
-    if(window.confirm('Hapus pelanggan ini?')) setCustomers(customers.filter(c => c.id !== id));
+    setConfirmData({
+      title: 'Hapus Pelanggan?',
+      message: 'Data pelanggan ini akan dihapus secara permanen.',
+      isDanger: true,
+      confirmText: 'Hapus',
+      action: () => setCustomers(customers.filter(c => c.id !== id))
+    });
   };
 
   return (
@@ -815,6 +840,7 @@ function CustomersView({ customers, setCustomers, thm, authUser }) {
           </tbody>
         </table>
       </div>
+
       {showAdd && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl p-8 border border-white animate-scaleIn">
@@ -831,15 +857,39 @@ function CustomersView({ customers, setCustomers, thm, authUser }) {
           </div>
         </div>
       )}
+
+      {/* Elegant Confirm Modal */}
+      {confirmData && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl animate-scaleIn border border-white">
+            <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4"><Trash2 size={30} /></div>
+            <h3 className="text-xl font-black text-gray-800 mb-2">{confirmData.title}</h3>
+            <p className="text-gray-500 font-medium mb-6">{confirmData.message}</p>
+            <div className="flex space-x-3">
+              <button onClick={() => setConfirmData(null)} className="flex-1 py-3 bg-gray-100 text-gray-500 font-black rounded-xl hover:bg-gray-200 transition">Batal</button>
+              <button onClick={() => { confirmData.action(); setConfirmData(null); }} className="flex-1 py-3 text-white font-black rounded-xl shadow-lg transition bg-rose-500 hover:bg-rose-600">{confirmData.confirmText}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 function DebtsView({ transactions, setTransactions, thm }) {
+  const [confirmData, setConfirmData] = useState(null);
   const debts = transactions.filter(t => t.paymentMethod === 'Kasbon');
+
   const payDebt = (id) => {
-    if(window.confirm('Tandai hutang ini sebagai LUNAS?')) setTransactions(transactions.map(t => t.id === id ? { ...t, paymentStatus: 'Lunas' } : t));
+    setConfirmData({
+      title: 'Konfirmasi Lunas',
+      message: 'Tandai hutang pelanggan ini sebagai LUNAS?',
+      isDanger: false,
+      confirmText: 'Ya, Lunas!',
+      action: () => setTransactions(transactions.map(t => t.id === id ? { ...t, paymentStatus: 'Lunas' } : t))
+    });
   };
+
   return (
     <div className="p-8 animate-fadeIn max-w-7xl mx-auto">
       <h2 className="text-3xl font-black text-gray-800 tracking-tight mb-8">Buku Kasbon / Piutang</h2>
@@ -864,6 +914,21 @@ function DebtsView({ transactions, setTransactions, thm }) {
           </tbody>
         </table>
       </div>
+
+      {/* Elegant Confirm Modal */}
+      {confirmData && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl animate-scaleIn border border-white">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle size={30} /></div>
+            <h3 className="text-xl font-black text-gray-800 mb-2">{confirmData.title}</h3>
+            <p className="text-gray-500 font-medium mb-6">{confirmData.message}</p>
+            <div className="flex space-x-3">
+              <button onClick={() => setConfirmData(null)} className="flex-1 py-3 bg-gray-100 text-gray-500 font-black rounded-xl hover:bg-gray-200 transition">Batal</button>
+              <button onClick={() => { confirmData.action(); setConfirmData(null); }} className="flex-1 py-3 text-white font-black rounded-xl shadow-lg transition bg-emerald-500 hover:bg-emerald-600">{confirmData.confirmText}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -871,6 +936,8 @@ function DebtsView({ transactions, setTransactions, thm }) {
 function InventoryView({ products, setProducts, thm }) {
   const [showAdd, setShowAdd] = useState(false);
   const [editingProd, setEditingProd] = useState(null);
+  const [confirmData, setConfirmData] = useState(null);
+  const [alertMsg, setAlertMsg] = useState('');
 
   const handleSave = (e) => {
     e.preventDefault(); const fd = new FormData(e.target);
@@ -879,13 +946,52 @@ function InventoryView({ products, setProducts, thm }) {
     else setProducts([prod, ...products]);
     setShowAdd(false); setEditingProd(null);
   };
-  const handleDelete = (id) => { if(window.confirm('Hapus produk permanen?')) setProducts(products.filter(p => p.id !== id)); };
+  
+  const handleDelete = (id) => {
+    setConfirmData({
+      title: 'Hapus Produk?',
+      message: 'Produk ini akan dihapus permanen dari inventaris.',
+      isDanger: true,
+      confirmText: 'Hapus',
+      action: () => setProducts(products.filter(p => p.id !== id))
+    });
+  };
 
-  const exportCSV = () => {
-    let csv = 'ID,Barcode,Nama Produk,Kategori,Stok,Modal Dus,Modal Satuan,Harga Jual\n';
-    products.forEach(p => { csv += `"${p.id}","${p.barcode || ''}","${p.name}","${p.category}","${p.stock}","${p.buyPriceBox}","${p.buyPriceUnit}","${p.sellPrice}"\n`; });
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `Inventaris.csv`; link.click();
+  const importCSV = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target.result;
+      const rows = text.split('\n').map(row => row.trim()).filter(row => row);
+      const newProducts = [];
+      // Start loop from 1 to skip header row
+      for (let i = 1; i < rows.length; i++) {
+        // Simple comma split
+        const cols = rows[i].split(',');
+        if (cols.length >= 6) {
+          newProducts.push({
+            id: 'PRD-IMP-' + Date.now() + i,
+            barcode: cols[0].trim(),
+            name: cols[1].trim(),
+            category: cols[2].trim(),
+            stock: parseInt(cols[3].trim()) || 0,
+            buyPriceBox: parseInt(cols[4].trim()) || 0, // Fallback logic
+            buyPriceUnit: parseInt(cols[4].trim()) || 0,
+            sellPrice: parseInt(cols[5].trim()) || 0,
+          });
+        }
+      }
+      
+      if(newProducts.length > 0) {
+          setProducts(prev => [...newProducts, ...prev]);
+          setAlertMsg(`Sukses mengimpor ${newProducts.length} data produk!`);
+      } else {
+          setAlertMsg('Format CSV tidak valid. Ikuti template: Barcode, Produk, Kategori, Stok, Harga Beli, Harga Jual');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = null; // reset so same file can be uploaded again if needed
   };
 
   return (
@@ -893,9 +999,10 @@ function InventoryView({ products, setProducts, thm }) {
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-black text-gray-800 tracking-tight">Manajemen Inventaris</h2>
         <div className="flex space-x-3">
-          <button onClick={exportCSV} className="bg-white border border-gray-200 text-gray-600 px-5 py-3 rounded-2xl flex items-center hover:bg-gray-50 shadow-sm font-black transition-colors">
-            <Download size={20} className="mr-2 text-amber-500"/> Export Data (.csv)
-          </button>
+          <label className="cursor-pointer bg-white border border-gray-200 text-gray-600 px-5 py-3 rounded-2xl flex items-center hover:bg-gray-50 shadow-sm font-black transition-colors">
+            <Upload size={20} className="mr-2 text-amber-500"/> Import Data (.csv)
+            <input type="file" accept=".csv" className="hidden" onChange={importCSV} />
+          </label>
           <button onClick={() => { setEditingProd(null); setShowAdd(true); }} className={`${thm.gradient} text-white px-5 py-3 rounded-2xl flex items-center font-black shadow-lg shadow-[#867233]/20 hover:-translate-y-1 transition-transform`}>
             <Plus size={20} className="mr-2"/> Tambah Produk
           </button>
@@ -920,9 +1027,11 @@ function InventoryView({ products, setProducts, thm }) {
                 </td>
               </tr>
             ))}
+            {products.length === 0 && <tr><td colSpan="6" className="p-10 text-center text-gray-400 font-bold">Belum ada produk.</td></tr>}
           </tbody>
         </table>
       </div>
+
       {showAdd && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl p-8 border border-white animate-scaleIn">
@@ -947,12 +1056,40 @@ function InventoryView({ products, setProducts, thm }) {
           </div>
         </div>
       )}
+
+      {/* Elegant Modals */}
+      {alertMsg && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl animate-scaleIn border border-white">
+            <div className="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4"><Package size={30} /></div>
+            <h3 className="text-xl font-black text-gray-800 mb-2">Informasi</h3>
+            <p className="text-gray-500 font-medium mb-6">{alertMsg}</p>
+            <button onClick={() => setAlertMsg('')} className="w-full py-3 bg-gray-100 text-gray-800 font-black rounded-xl hover:bg-gray-200 transition">Tutup</button>
+          </div>
+        </div>
+      )}
+
+      {confirmData && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl animate-scaleIn border border-white">
+            <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4"><Trash2 size={30} /></div>
+            <h3 className="text-xl font-black text-gray-800 mb-2">{confirmData.title}</h3>
+            <p className="text-gray-500 font-medium mb-6">{confirmData.message}</p>
+            <div className="flex space-x-3">
+              <button onClick={() => setConfirmData(null)} className="flex-1 py-3 bg-gray-100 text-gray-500 font-black rounded-xl hover:bg-gray-200 transition">Batal</button>
+              <button onClick={() => { confirmData.action(); setConfirmData(null); }} className="flex-1 py-3 text-white font-black rounded-xl shadow-lg transition bg-rose-500 hover:bg-rose-600">{confirmData.confirmText}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 function HistoryView({ transactions, setTransactions, settings, thm, authUser }) {
   const [selectedTx, setSelectedTx] = useState(null);
+  const [confirmData, setConfirmData] = useState(null);
+  
   const today = new Date().toISOString().split('T')[0];
   const threeYearsAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 3)).toISOString().split('T')[0];
   const [startDate, setStartDate] = useState(threeYearsAgo);
@@ -960,8 +1097,28 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
 
   const filteredTx = transactions.filter(tx => { const d = new Date(tx.date); return d >= new Date(startDate) && d <= new Date(endDate + 'T23:59:59'); });
 
-  const importCSV = (e) => { const f = e.target.files[0]; if(f) alert('Simulasi Import Riwayat Transaksi Berhasil.'); };
-  const handleDelete = (id) => { if(window.confirm('Hapus transaksi permanen?')) setTransactions(transactions.filter(t => t.id !== id)); };
+  const exportCSV = () => {
+    let csv = 'Waktu,ID Transaksi,Pembayaran,Total\n';
+    filteredTx.forEach(tx => { 
+      const waktu = new Date(tx.date).toLocaleString('id-ID');
+      csv += `"${waktu}","${tx.id}","${tx.paymentMethod}","${tx.total}"\n`; 
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a"); 
+    link.href = URL.createObjectURL(blob); 
+    link.download = `Riwayat_Transaksi.csv`; 
+    link.click();
+  };
+
+  const handleDelete = (id) => {
+    setConfirmData({
+      title: 'Hapus Transaksi?',
+      message: 'Catatan transaksi ini akan dihapus permanen.',
+      isDanger: true,
+      confirmText: 'Hapus',
+      action: () => setTransactions(transactions.filter(t => t.id !== id))
+    });
+  };
 
   return (
     <div className="p-8 animate-fadeIn max-w-7xl mx-auto">
@@ -971,10 +1128,9 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
           <p className="text-sm font-bold text-gray-400 mt-2 tracking-wide">Ditemukan {filteredTx.length} nota</p>
         </div>
         {authUser.role === 'owner' && (
-          <label className={`cursor-pointer flex items-center px-5 py-3 ${thm.gradient} text-white font-black rounded-2xl shadow-lg shadow-[#867233]/20 hover:-translate-y-1 transition-transform`}>
-            <Upload size={20} className="mr-2"/> Import Data (.csv)
-            <input type="file" accept=".csv" className="hidden" onChange={importCSV} />
-          </label>
+          <button onClick={exportCSV} className={`flex items-center px-5 py-3 ${thm.gradient} text-white font-black rounded-2xl shadow-lg shadow-[#867233]/20 hover:-translate-y-1 transition-transform`}>
+            <Download size={20} className="mr-2"/> Export Data (.csv)
+          </button>
         )}
       </div>
 
@@ -1016,14 +1172,37 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
           </tbody>
         </table>
       </div>
+      
       {selectedTx && <ReceiptModal transaction={selectedTx} settings={settings} onClose={() => setSelectedTx(null)} thm={thm} />}
+
+      {/* Elegant Confirm Modal */}
+      {confirmData && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl animate-scaleIn border border-white">
+            <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4"><Trash2 size={30} /></div>
+            <h3 className="text-xl font-black text-gray-800 mb-2">{confirmData.title}</h3>
+            <p className="text-gray-500 font-medium mb-6">{confirmData.message}</p>
+            <div className="flex space-x-3">
+              <button onClick={() => setConfirmData(null)} className="flex-1 py-3 bg-gray-100 text-gray-500 font-black rounded-xl hover:bg-gray-200 transition">Batal</button>
+              <button onClick={() => { confirmData.action(); setConfirmData(null); }} className="flex-1 py-3 text-white font-black rounded-xl shadow-lg transition bg-rose-500 hover:bg-rose-600">{confirmData.confirmText}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 function SettingsView({ settings, setSettings, themeColors, thm }) {
   const [formData, setFormData] = useState(settings);
-  const handleSubmit = (e) => { e.preventDefault(); setSettings(formData); alert('Pengaturan Disimpan!'); };
+  const [alertMsg, setAlertMsg] = useState('');
+  
+  const handleSubmit = (e) => { 
+    e.preventDefault(); 
+    setSettings(formData); 
+    setAlertMsg('Pengaturan toko berhasil disimpan!'); 
+  };
+
   return (
     <div className="p-8 max-w-4xl mx-auto animate-fadeIn">
       <h2 className="text-3xl font-black text-gray-800 tracking-tight mb-8">Pengaturan Toko</h2>
@@ -1081,6 +1260,18 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
         </div>
         <button type="submit" className={`w-full py-5 ${thm.gradient} text-white font-black text-lg rounded-2xl shadow-xl hover:-translate-y-1 transform transition-all active:scale-95`}>Simpan Pengaturan</button>
       </form>
+
+      {/* Elegant Success Modal */}
+      {alertMsg && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl animate-scaleIn border border-white">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle size={30} /></div>
+            <h3 className="text-xl font-black text-gray-800 mb-2">Sukses</h3>
+            <p className="text-gray-500 font-medium mb-6">{alertMsg}</p>
+            <button onClick={() => setAlertMsg('')} className="w-full py-3 bg-gray-100 text-gray-800 font-black rounded-xl hover:bg-gray-200 transition">Tutup</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
