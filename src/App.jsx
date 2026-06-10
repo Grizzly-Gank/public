@@ -1290,21 +1290,36 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
   );
 }
 
-// --- SCANNER COMPONENT (DYNAMIC SCRIPT INJECTION) ---
+// --- SCANNER COMPONENT (DIRECT API INJECTION) ---
 function BarcodeScannerModal({ onClose, onScan }) {
   useEffect(() => {
-    let html5QrcodeScanner;
+    let html5QrCode;
+    let isMounted = true;
+
     const initScanner = () => {
-      if (window.Html5QrcodeScanner) {
-        html5QrcodeScanner = new window.Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } }, false);
-        html5QrcodeScanner.render((decodedText) => {
-          if (html5QrcodeScanner) html5QrcodeScanner.clear();
-          onScan(decodedText);
-        }, () => {});
+      if (window.Html5Qrcode && isMounted) {
+        html5QrCode = new window.Html5Qrcode("reader");
+        html5QrCode.start(
+          { facingMode: "environment" }, // Kamera belakang otomatis
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          (decodedText) => {
+            if (html5QrCode.isScanning) {
+              html5QrCode.stop().then(() => {
+                html5QrCode.clear();
+                onScan(decodedText);
+              }).catch(err => console.error(err));
+            }
+          },
+          (errorMessage) => {
+            // Abaikan error parse agar console tidak spam
+          }
+        ).catch(err => {
+          console.error("Gagal akses kamera", err);
+        });
       }
     };
 
-    if (!window.Html5QrcodeScanner) {
+    if (!window.Html5Qrcode) {
       const script = document.createElement('script');
       script.src = "https://unpkg.com/html5-qrcode";
       script.onload = initScanner;
@@ -1314,18 +1329,27 @@ function BarcodeScannerModal({ onClose, onScan }) {
     }
 
     return () => {
-      if (html5QrcodeScanner) html5QrcodeScanner.clear().catch(e => console.error(e));
+      isMounted = false;
+      if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => html5QrCode.clear()).catch(e => console.error(e));
+      }
     };
   }, [onScan]);
 
   return (
     <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[80] flex items-center justify-center p-4 animate-fadeIn">
-      <div className="bg-white p-6 rounded-[2.5rem] w-full max-w-md shadow-2xl relative border border-white animate-scaleIn">
-        <button onClick={onClose} className="absolute top-5 right-5 text-gray-400 hover:text-gray-800 bg-gray-100 p-2 rounded-xl transition-colors"><X size={20}/></button>
-        <div className="w-16 h-16 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"><ScanLine size={30} /></div>
+      <div className="bg-white p-6 rounded-[2.5rem] w-full max-w-md shadow-2xl relative border border-white animate-scaleIn flex flex-col items-center">
+        <button onClick={onClose} className="absolute top-5 right-5 text-gray-400 hover:text-gray-800 bg-gray-100 p-2 rounded-xl transition-colors z-20"><X size={20}/></button>
+        <div className="w-16 h-16 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mb-4"><ScanLine size={30} /></div>
         <h3 className="font-black text-xl text-gray-800 mb-6 text-center">Arahkan ke Barcode</h3>
-        <div id="reader" className="w-full overflow-hidden rounded-3xl border-4 border-dashed border-gray-200 bg-gray-50 min-h-[250px]"></div>
-        <p className="text-center text-xs text-gray-400 mt-6 font-bold tracking-wide">Proses scan berjalan otomatis.</p>
+        
+        {/* Kotak Kamera dengan Garis Merah Laser Otomatis */}
+        <div className="relative w-full max-w-[250px] aspect-square overflow-hidden rounded-3xl border-4 border-dashed border-gray-200 bg-black flex items-center justify-center mx-auto">
+          <div id="reader" className="w-full h-full object-cover"></div>
+          <div className="absolute top-1/2 left-0 w-full h-[2px] bg-red-500 shadow-[0_0_15px_3px_rgba(239,68,68,0.8)] z-10 animate-pulse pointer-events-none"></div>
+        </div>
+        
+        <p className="text-center text-xs text-gray-400 mt-6 font-bold tracking-wide">Kamera aktif. Proses scan berjalan otomatis.</p>
       </div>
     </div>
   );
