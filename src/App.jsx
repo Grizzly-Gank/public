@@ -74,7 +74,8 @@ export default function App() {
     paperSize: '58mm',
     connectedDeviceName: '',
     receiptLogo: null,
-    receiptFooter: '*** Terima Kasih ***'
+    receiptFooter: '*** Terima Kasih ***',
+    scannerType: 'camera' // Default opsi scanner
   });
 
   const themeColors = {
@@ -421,6 +422,8 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
   
   const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [showScanner, setShowScanner] = useState(false);
+  
+  const searchInputRef = useRef(null);
 
   const categories = useMemo(() => ['Semua', ...new Set(products.map(p => p.category).filter(Boolean))], [products]);
 
@@ -484,6 +487,15 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
     setShowReceipt(true);
   };
 
+  const handleScanClick = () => {
+    if (settings.scannerType === 'usb') {
+      searchInputRef.current?.focus();
+      setAlertMsg('Mode USB Scanner Aktif. Kursor difokuskan ke kolom pencarian, silakan scan menggunakan alat USB Anda.');
+    } else {
+      setShowScanner(true);
+    }
+  };
+
   return (
     <div className="flex h-full print:block print:h-auto animate-fadeIn relative">
       <div className="flex-1 flex flex-col print:hidden p-4 space-y-4 max-w-5xl mx-auto">
@@ -491,6 +503,7 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
           <div className="relative flex-1">
             <Search className="absolute left-5 top-4 text-gray-400" size={22} />
             <input 
+              ref={searchInputRef}
               type="text" 
               placeholder="Cari menu atau scan barcode..." 
               value={search}
@@ -498,7 +511,7 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
               className="w-full pl-14 pr-14 py-4 rounded-2xl bg-gray-50 hover:bg-gray-100 focus:bg-white focus:ring-2 border-none transition-all outline-none font-bold text-gray-700 text-lg shadow-inner"
               style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}
             />
-            <button onClick={() => setShowScanner(true)} className={`absolute right-3 top-2 p-2 rounded-xl ${thm.light} ${thm.text} hover:opacity-80 transition transform hover:scale-105`}>
+            <button onClick={handleScanClick} className={`absolute right-3 top-2 p-2 rounded-xl ${thm.light} ${thm.text} hover:opacity-80 transition transform hover:scale-105`}>
               <ScanLine size={24} />
             </button>
           </div>
@@ -599,7 +612,7 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm rounded-[2.5rem]"></div>
           <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full text-center relative z-10 animate-scaleIn shadow-2xl border border-white">
             <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4"><Package size={30} /></div>
-            <h3 className="font-black text-gray-800 mb-2">Peringatan</h3>
+            <h3 className="font-black text-gray-800 mb-2">Informasi</h3>
             <p className="text-sm text-gray-500 font-medium mb-6">{alertMsg}</p>
             <button onClick={() => setAlertMsg('')} className="w-full py-3 bg-gray-100 text-gray-600 font-black rounded-xl hover:bg-gray-200 transition-colors">Tutup</button>
           </div>
@@ -1217,33 +1230,51 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <div>
-            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-5 flex items-center"><Printer size={16} className="mr-2 text-slate-400"/> Printer Struk</h3>
-            <div className="space-y-4">
-               <div className="flex items-center space-x-3">
-                 <select value={formData.printerType} onChange={e => setFormData({...formData, printerType: e.target.value})} className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-4 outline-none font-bold text-gray-700 shadow-sm appearance-none" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}>
-                   <option value="bluetooth">Bluetooth Thermal</option>
-                   <option value="usb">USB Printer</option>
-                 </select>
+          <div className="space-y-10">
+            <div>
+              <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-5 flex items-center"><Printer size={16} className="mr-2 text-slate-400"/> Printer Struk</h3>
+              <div className="space-y-4">
+                 <div className="flex items-center space-x-3">
+                   <select value={formData.printerType} onChange={e => setFormData({...formData, printerType: e.target.value})} className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-4 outline-none font-bold text-gray-700 shadow-sm appearance-none" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}>
+                     <option value="bluetooth">Bluetooth Thermal</option>
+                     <option value="usb">USB Printer</option>
+                   </select>
+                   {formData.printerType === 'bluetooth' && (
+                     <button type="button" onClick={handleConnectBluetooth} className={`px-5 py-4 rounded-2xl text-white font-black whitespace-nowrap shadow-md hover:-translate-y-0.5 transition-transform ${thm.gradient}`}>
+                       <Smartphone size={20} className="inline mr-2"/> Cari Perangkat
+                     </button>
+                   )}
+                 </div>
                  {formData.printerType === 'bluetooth' && (
-                   <button type="button" onClick={handleConnectBluetooth} className={`px-5 py-4 rounded-2xl text-white font-black whitespace-nowrap shadow-md hover:-translate-y-0.5 transition-transform ${thm.gradient}`}>
-                     <Smartphone size={20} className="inline mr-2"/> Cari Perangkat
-                   </button>
-                 )}
-               </div>
-               {formData.printerType === 'bluetooth' && (
-                  <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-between shadow-inner">
-                    <div>
-                      <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Status Perangkat</p>
-                      <p className="font-bold text-blue-700 text-sm mt-0.5">{formData.connectedDeviceName || 'Belum ada printer yang dipasangkan'}</p>
+                    <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-between shadow-inner">
+                      <div>
+                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Status Perangkat</p>
+                        <p className="font-bold text-blue-700 text-sm mt-0.5">{formData.connectedDeviceName || 'Belum ada printer yang dipasangkan'}</p>
+                      </div>
+                      <div className={`w-3 h-3 rounded-full shadow-sm ${formData.connectedDeviceName ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></div>
                     </div>
-                    <div className={`w-3 h-3 rounded-full shadow-sm ${formData.connectedDeviceName ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></div>
-                  </div>
-               )}
-               <select value={formData.paperSize} onChange={e => setFormData({...formData, paperSize: e.target.value})} className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-4 outline-none font-bold text-gray-700 shadow-sm appearance-none" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}>
-                 <option value="58mm">Kertas 58mm</option>
-                 <option value="80mm">Kertas 80mm</option>
-               </select>
+                 )}
+                 <select value={formData.paperSize} onChange={e => setFormData({...formData, paperSize: e.target.value})} className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-4 outline-none font-bold text-gray-700 shadow-sm appearance-none" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}>
+                   <option value="58mm">Kertas 58mm</option>
+                   <option value="80mm">Kertas 80mm</option>
+                 </select>
+              </div>
+            </div>
+
+            {/* NEW: Scanner Barcode Setting */}
+            <div>
+              <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-5 flex items-center"><ScanLine size={16} className="mr-2 text-slate-400"/> Scanner Barcode</h3>
+              <div className="space-y-4">
+                 <select value={formData.scannerType || 'camera'} onChange={e => setFormData({...formData, scannerType: e.target.value})} className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-4 outline-none font-bold text-gray-700 shadow-sm appearance-none" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}>
+                   <option value="camera">Kamera Bawaan (HP/Webcam)</option>
+                   <option value="usb">USB Scanner (Barcode Reader)</option>
+                 </select>
+                 {formData.scannerType === 'usb' && (
+                    <p className="text-xs text-gray-500 font-bold bg-gray-50 p-3 rounded-xl border border-gray-100">
+                       Pastikan alat Scanner USB Anda sudah tertancap ke perangkat dan terdeteksi sebagai keyboard.
+                    </p>
+                 )}
+              </div>
             </div>
           </div>
 
