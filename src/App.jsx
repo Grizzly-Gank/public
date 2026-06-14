@@ -53,7 +53,7 @@ const CustomStyles = () => (
 export default function App() {
   const [authUser, setAuthUser] = useLocalStorage('pos_auth_user', null); 
   const [activeTab, setActiveTab] = useState('pos');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // False = Mode Icon/Mini
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Data States
@@ -75,7 +75,7 @@ export default function App() {
     connectedDeviceName: '',
     receiptLogo: null,
     receiptFooter: '*** Terima Kasih ***',
-    scannerType: 'camera' // Default opsi scanner
+    scannerType: 'camera'
   });
 
   const themeColors = {
@@ -117,47 +117,64 @@ export default function App() {
   return (
     <>
       <CustomStyles />
+      {/* Container utama Flex side-by-side */}
       <div className="flex h-screen bg-[#F8F9FC] text-gray-800 overflow-hidden">
         
-        {/* Sidebar */}
-        <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <div className="flex items-center justify-between p-6 border-b border-gray-50">
-            <h2 className={`text-2xl font-black bg-clip-text text-transparent ${thm.gradient} tracking-tight`}>{settings.storeName}</h2>
-            <button onClick={() => setIsSidebarOpen(false)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 transition-colors"><X size={20} /></button>
+        {/* SIDEBAR BERSYARAT (Expand/Collapse Mode Pendorong) */}
+        <div className={`flex flex-col flex-shrink-0 z-50 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-[5rem]'}`}>
+          
+          <div className={`flex items-center h-20 border-b border-gray-50 ${isSidebarOpen ? 'justify-between px-6' : 'justify-center px-0'}`}>
+            {isSidebarOpen ? (
+              <h2 className={`text-2xl font-black bg-clip-text text-transparent ${thm.gradient} tracking-tight truncate`}>{settings.storeName}</h2>
+            ) : (
+              <h2 className={`text-2xl font-black bg-clip-text text-transparent ${thm.gradient} tracking-tight`} title={settings.storeName}>
+                {settings.storeName.substring(0, 2).toUpperCase()}
+              </h2>
+            )}
           </div>
-          <nav className="p-4 space-y-1.5">
+
+          <nav className="flex-1 py-4 px-3 space-y-1.5 overflow-y-auto hide-scrollbar overflow-x-hidden">
             {navItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => { setActiveTab(item.id); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center space-x-3 p-3.5 rounded-2xl transition-all duration-200 ${activeTab === item.id ? `${thm.gradient} text-white shadow-md transform scale-[1.02]` : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                onClick={() => setActiveTab(item.id)}
+                title={!isSidebarOpen ? item.label : ''}
+                className={`w-full flex items-center rounded-2xl transition-all duration-200 ${isSidebarOpen ? 'p-3.5 justify-start' : 'p-3.5 justify-center'} ${activeTab === item.id ? `${thm.gradient} text-white shadow-md transform scale-[1.02]` : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
               >
-                {item.icon}
-                <span className="font-semibold text-sm tracking-wide">{item.label}</span>
+                <div className="flex-shrink-0">{item.icon}</div>
+                {isSidebarOpen && <span className="ml-3 font-semibold text-sm tracking-wide truncate">{item.label}</span>}
               </button>
             ))}
           </nav>
-          <div className="absolute bottom-0 w-full p-5 border-t border-gray-50 bg-white/80 backdrop-blur-md">
-            <div className="mb-3 px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center">
-              Login: <span className={`ml-1 px-2 py-0.5 rounded-md font-bold text-white ${authUser.role === 'owner' ? 'bg-blue-500' : 'bg-emerald-500'}`}>{authUser.role === 'owner' ? 'Owner' : 'Kasir'}</span>
-            </div>
+          
+          <div className={`border-t border-gray-50 bg-white transition-all duration-300 ${isSidebarOpen ? 'p-5' : 'p-3'}`}>
+            {isSidebarOpen ? (
+              <div className="mb-3 px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center">
+                Login: <span className={`ml-1 px-2 py-0.5 rounded-md font-bold text-white ${authUser.role === 'owner' ? 'bg-blue-500' : 'bg-emerald-500'}`}>{authUser.role === 'owner' ? 'Owner' : 'Kasir'}</span>
+              </div>
+            ) : (
+              <div className="mb-3 flex justify-center">
+                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-white text-xs ${authUser.role === 'owner' ? 'bg-blue-500' : 'bg-emerald-500'}`} title={authUser.role === 'owner' ? 'Owner' : 'Kasir'}>
+                   {authUser.role === 'owner' ? 'OW' : 'KS'}
+                 </div>
+              </div>
+            )}
             <button 
               onClick={() => setAuthUser(null)}
-              className="w-full flex items-center justify-center space-x-2 p-3.5 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white rounded-2xl transition-all font-bold text-sm group"
+              title={!isSidebarOpen ? "Keluar Sistem" : ""}
+              className={`w-full flex items-center justify-center bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white rounded-2xl transition-all font-bold text-sm group ${isSidebarOpen ? 'p-3.5 space-x-2' : 'p-3'}`}
             >
-              <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-              <span>Keluar Sistem</span>
+              <LogOut size={18} className={isSidebarOpen ? "group-hover:-translate-x-1 transition-transform" : ""} />
+              {isSidebarOpen && <span>Keluar Sistem</span>}
             </button>
           </div>
         </div>
 
-        {isSidebarOpen && <div className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-40 transition-opacity" onClick={() => setIsSidebarOpen(false)} />}
-
         {/* Main Workspace */}
-        <div className="flex-1 flex flex-col h-screen overflow-hidden print:bg-white">
+        <div className="flex-1 flex flex-col h-screen overflow-hidden print:bg-white min-w-0">
           <header className="bg-white/80 backdrop-blur-md shadow-[0_4px_30px_-5px_rgba(0,0,0,0.03)] h-20 flex items-center justify-between px-6 z-10 print:hidden sticky top-0 border-b border-gray-100/50">
             <div className="flex items-center space-x-4">
-              <button onClick={() => setIsSidebarOpen(true)} className={`p-2.5 rounded-2xl ${thm.light} ${thm.text} hover:opacity-80 transition-colors`}>
+              <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2.5 rounded-2xl ${thm.light} ${thm.text} hover:opacity-80 transition-colors`}>
                 <Menu size={24} />
               </button>
               <h1 className={`text-2xl font-black text-gray-800 hidden sm:block tracking-tight`}>{settings.storeName}</h1>
@@ -612,7 +629,7 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm rounded-[2.5rem]"></div>
           <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full text-center relative z-10 animate-scaleIn shadow-2xl border border-white">
             <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4"><Package size={30} /></div>
-            <h3 className="font-black text-gray-800 mb-2">Informasi</h3>
+            <h3 className="font-black text-gray-800 mb-2">Peringatan</h3>
             <p className="text-sm text-gray-500 font-medium mb-6">{alertMsg}</p>
             <button onClick={() => setAlertMsg('')} className="w-full py-3 bg-gray-100 text-gray-600 font-black rounded-xl hover:bg-gray-200 transition-colors">Tutup</button>
           </div>
