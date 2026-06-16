@@ -52,50 +52,6 @@ const CustomStyles = ({ fontSize }) => {
       .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
       .animate-fadeInUp { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       .animate-scaleIn { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-      @media print {
-        body * {
-          visibility: hidden;
-        }
-        #receipt-content, #receipt-content * {
-          visibility: visible;
-        }
-        #receipt-modal {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-          height: 100%;
-          background: white;
-          z-index: 9999;
-          padding: 0;
-          display: flex;
-          justify-content: center;
-        }
-        #receipt-container {
-          max-width: 350px;
-          width: 100%;
-          box-shadow: none;
-          border: none;
-          border-radius: 0;
-          max-height: none;
-        }
-        .print\\:hidden {
-          display: none !important;
-        }
-        .print\\:block {
-          display: block !important;
-        }
-        .print\\:p-0 {
-          padding: 0 !important;
-        }
-        .print\\:bg-white {
-          background-color: white !important;
-        }
-        .print\\:overflow-visible {
-          overflow: visible !important;
-        }
-      }
     `}</style>
   );
 };
@@ -169,9 +125,9 @@ export default function App() {
   return (
     <>
       <CustomStyles fontSize={settings.appFontSize} />
-      <div className="flex h-screen bg-[#F8F9FC] text-gray-800 overflow-hidden print:hidden">
+      <div className="flex h-screen bg-[#F8F9FC] text-gray-800 overflow-hidden print:h-auto print:bg-white print:overflow-visible">
         
-        <div className={`flex flex-col flex-shrink-0 z-50 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-[5rem]'}`}>
+        <div className={`flex flex-col flex-shrink-0 z-50 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all duration-300 ease-in-out print:hidden ${isSidebarOpen ? 'w-64' : 'w-[5rem]'}`}>
           <div className={`flex items-center h-20 border-b border-gray-50 ${isSidebarOpen ? 'justify-between px-6' : 'justify-center px-0'}`}>
             {isSidebarOpen ? (
               <h2 className={`text-2xl font-black bg-clip-text text-transparent ${thm.gradient} tracking-tight truncate`}>{settings.storeName}</h2>
@@ -219,8 +175,8 @@ export default function App() {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
-          <header className="bg-white/80 backdrop-blur-md shadow-[0_4px_30px_-5px_rgba(0,0,0,0.03)] h-20 flex items-center justify-between px-6 z-10 sticky top-0 border-b border-gray-100/50">
+        <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0 print:h-auto print:overflow-visible print:bg-white">
+          <header className="bg-white/80 backdrop-blur-md shadow-[0_4px_30px_-5px_rgba(0,0,0,0.03)] h-20 flex items-center justify-between px-6 z-10 sticky top-0 border-b border-gray-100/50 print:hidden">
             <div className="flex items-center space-x-4">
               <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2.5 rounded-2xl ${thm.light} ${thm.text} hover:opacity-80 transition-colors`}>
                 <Menu size={24} />
@@ -238,18 +194,23 @@ export default function App() {
             </div>
           </header>
 
-          <main className="flex-1 overflow-auto bg-[#F8F9FC] relative">
-            {activeTab === 'dashboard' && authUser.role === 'owner' && <DashboardView transactions={transactions} products={products} thm={thm} />}
-            {activeTab === 'pos' && <POSView products={products} setProducts={setProducts} transactions={transactions} setTransactions={setTransactions} customers={customers} settings={settings} thm={thm} authUser={authUser} />}
-            {activeTab === 'customers' && <CustomersView customers={customers} setCustomers={setCustomers} thm={thm} authUser={authUser} />}
-            {activeTab === 'debts' && <DebtsView transactions={transactions} setTransactions={setTransactions} thm={thm} />}
-            {activeTab === 'inventory' && authUser.role === 'owner' && <InventoryView products={products} setProducts={setProducts} thm={thm} />}
-            {activeTab === 'history' && <HistoryView transactions={transactions} setTransactions={setTransactions} settings={settings} thm={thm} authUser={authUser} />}
-            {activeTab === 'settings' && authUser.role === 'owner' && <SettingsView settings={settings} setSettings={setSettings} themeColors={themeColors} thm={thm} />}
+          <main className="flex-1 flex flex-col overflow-hidden bg-[#F8F9FC] relative print:overflow-visible print:bg-white print:h-auto">
+            <div className="flex-1 overflow-auto print:overflow-visible print:bg-white relative">
+              {activeTab === 'dashboard' && authUser.role === 'owner' && <DashboardView transactions={transactions} products={products} thm={thm} />}
+              {activeTab === 'pos' && <POSView products={products} setProducts={setProducts} transactions={transactions} setTransactions={setTransactions} customers={customers} settings={settings} thm={thm} authUser={authUser} />}
+              {activeTab === 'customers' && <CustomersView customers={customers} setCustomers={setCustomers} thm={thm} authUser={authUser} />}
+              {activeTab === 'debts' && <DebtsView transactions={transactions} setTransactions={setTransactions} thm={thm} />}
+              {activeTab === 'inventory' && authUser.role === 'owner' && <InventoryView products={products} setProducts={setProducts} thm={thm} />}
+              {activeTab === 'history' && <HistoryView transactions={transactions} setTransactions={setTransactions} settings={settings} thm={thm} authUser={authUser} />}
+              {activeTab === 'settings' && authUser.role === 'owner' && <SettingsView settings={settings} setSettings={setSettings} themeColors={themeColors} thm={thm} />}
+            </div>
+            
+            <footer className="py-3 text-center text-xs font-bold text-gray-400 tracking-wide bg-white border-t border-gray-100 z-10 shrink-0 print:hidden">
+              © 2026 M. Ghozzin Dirham | All Right Reserved
+            </footer>
           </main>
         </div>
       </div>
-
     </>
   );
 }
@@ -271,7 +232,6 @@ function LoginScreen({ onLogin, thm }) {
     } else if (username === 'akunkasir1727' && password === '1sampai1727') {
       onLogin({ role: 'cashier', username });
     } else {
-      // INSTRUKSI 4: Pesan error disingkat
       setError('username atau sandi salah. silakan cek kembali');
     }
   };
@@ -281,7 +241,7 @@ function LoginScreen({ onLogin, thm }) {
       <div className={`absolute top-[-10%] left-[-10%] w-96 h-96 ${thm.primary} opacity-10 rounded-full blur-3xl`}></div>
       <div className={`absolute bottom-[-10%] right-[-10%] w-96 h-96 ${thm.primary} opacity-10 rounded-full blur-3xl`}></div>
 
-      <div className="bg-white/80 backdrop-blur-xl p-10 rounded-[2.5rem] shadow-[0_20px_60px_rgb(0,0,0,0.05)] w-full max-w-md transform transition-all duration-500 border border-white z-10 animate-scaleIn">
+      <div className="bg-white/80 backdrop-blur-xl p-10 rounded-[2.5rem] shadow-[0_20px_60px_rgb(0,0,0,0.05)] w-full max-w-md transform transition-all duration-500 border border-white z-10 animate-scaleIn flex flex-col">
         <div className="text-center mb-10">
           <div className={`w-20 h-20 mx-auto ${thm.gradient} rounded-[1.5rem] flex items-center justify-center mb-5 shadow-lg shadow-[#867233]/20 text-white transform hover:rotate-6 transition-transform`}>
             <ShoppingCart size={40} />
@@ -289,16 +249,14 @@ function LoginScreen({ onLogin, thm }) {
           <h1 className="text-4xl font-black text-gray-800 tracking-tight">KasirGo</h1>
           <p className="text-gray-500 text-sm mt-2 font-medium">Retail Point of Sale Modern</p>
         </div>
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-6 flex-1">
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Username</label>
-            {/* INSTRUKSI 4: Placeholder diubah */}
             <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className={`w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:border-transparent ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-sm`} placeholder="masukkan username" />
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Kata Sandi</label>
             <div className="relative">
-               {/* INSTRUKSI 4: Placeholder diubah */}
               <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className={`w-full p-4 pr-12 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:border-transparent ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-sm`} placeholder="masukkan sandi" />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors">
                 {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
@@ -528,7 +486,6 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
     }).filter(item => item.qty > 0));
   };
 
-  // FUNGSI INPUT QTY MANUAL (Instruksi 3)
   const handleQtyChange = (id, value) => {
       const newQty = parseInt(value);
       if (isNaN(newQty) || newQty < 1) return;
@@ -586,14 +543,10 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
     }
   };
 
-  // INSTRUKSI 4: Shortcut Keyboard F12 khusus PC
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Cek tombol F12, dan pastikan tidak ada popup yang sedang terbuka, dan keranjang tidak kosong
       if (e.key === 'F12' && cart.length > 0 && !showCheckout && !showReceipt && !showScanner && !alertMsg) {
-        e.preventDefault(); // Mencegah dev tools browser terbuka (meski di beberapa browser tidak bisa dicegah)
-        
-        // Pengecekan sederhana untuk layar PC (lebar > 768px) sesuai instruksi "hanya berlaku saat menggunakan PC"
+        e.preventDefault(); 
         if (window.innerWidth > 768) {
           setShowCheckout(true);
         }
@@ -605,135 +558,136 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
   }, [cart, showCheckout, showReceipt, showScanner, alertMsg]);
 
   return (
-    <div className="flex h-full animate-fadeIn relative">
-      <div className="flex-1 flex flex-col p-4 space-y-4 max-w-5xl mx-auto">
-        <div className="bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem] p-3 flex items-center space-x-2 border border-gray-100">
-          <div className="relative flex-1">
-            <Search className="absolute left-5 top-4 text-gray-400" size={22} />
-            <input 
-              ref={searchInputRef}
-              type="text" 
-              placeholder="Cari menu atau scan barcode..." 
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-14 pr-14 py-4 rounded-2xl bg-gray-50 hover:bg-gray-100 focus:bg-white focus:ring-2 border-none transition-all outline-none font-bold text-gray-700 text-lg shadow-inner"
-              style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}
-            />
-            <button onClick={handleScanClick} className={`absolute right-3 top-2 p-2 rounded-xl ${thm.light} ${thm.text} hover:opacity-80 transition transform hover:scale-105`}>
-              <ScanLine size={24} />
+    <>
+      <div className="flex h-full animate-fadeIn relative print:hidden">
+        <div className="flex-1 flex flex-col p-4 space-y-4 max-w-5xl mx-auto">
+          <div className="bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem] p-3 flex items-center space-x-2 border border-gray-100">
+            <div className="relative flex-1">
+              <Search className="absolute left-5 top-4 text-gray-400" size={22} />
+              <input 
+                ref={searchInputRef}
+                type="text" 
+                placeholder="Cari menu atau scan barcode..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-14 pr-14 py-4 rounded-2xl bg-gray-50 hover:bg-gray-100 focus:bg-white focus:ring-2 border-none transition-all outline-none font-bold text-gray-700 text-lg shadow-inner"
+                style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}
+              />
+              <button onClick={handleScanClick} className={`absolute right-3 top-2 p-2 rounded-xl ${thm.light} ${thm.text} hover:opacity-80 transition transform hover:scale-105`}>
+                <ScanLine size={24} />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex space-x-2 overflow-x-auto hide-scrollbar py-1">
+            {categories.map(cat => (
+               <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-5 py-2.5 rounded-full whitespace-nowrap text-sm font-bold transition-all shadow-sm border ${selectedCategory === cat ? thm.gradient + ' text-white border-transparent' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'}`}>
+                 {cat}
+               </button>
+            ))}
+          </div>
+
+          <div className="flex-1 overflow-auto space-y-4 pb-20 px-2 hide-scrollbar">
+            {filteredProducts.map(product => (
+              <div key={product.id} className="bg-white p-6 rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 flex items-center justify-between hover:shadow-[0_10px_30px_rgb(0,0,0,0.08)] transition-all transform hover:-translate-y-1 cursor-pointer group" onClick={() => addToCart(product)}>
+                <div className="flex flex-col">
+                  <span className="font-black text-gray-800 text-xl group-hover:text-emerald-600 transition-colors">{product.name}</span>
+                  <div className="flex items-center space-x-3 mt-2">
+                    <span className="px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs font-bold tracking-wide">{product.category || 'Item'}</span>
+                    <span className={`text-xs font-black tracking-wide ${product.stock > 10 ? 'text-emerald-500' : 'text-rose-500'}`}>Sisa: {product.stock}</span>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-5">
+                  <span className={`font-black text-2xl bg-clip-text text-transparent ${thm.gradient}`}>Rp {product.sellPrice.toLocaleString('id-ID')}</span>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); addToCart(product); }}
+                    className={`p-3 rounded-2xl ${thm.light} ${thm.text} hover:scale-110 transition-transform shadow-sm`}
+                  >
+                    <Plus size={24} />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {filteredProducts.length === 0 && <div className="text-center p-10 text-gray-400 font-bold">Produk tidak ditemukan.</div>}
+          </div>
+        </div>
+
+        <div className="w-[420px] bg-white flex flex-col shadow-[-10px_0_40px_rgb(0,0,0,0.05)] z-20 border-l border-gray-100">
+          <div className="p-6 flex justify-between items-center bg-white z-10 shadow-sm">
+            <h2 className="text-2xl font-black text-gray-800 tracking-tight flex items-center"><ShoppingCart size={24} className="mr-3 text-emerald-500"/> Pesanan</h2>
+            {cart.length > 0 && (
+              <button onClick={() => setCart([])} className="text-rose-500 text-sm font-black flex items-center hover:bg-rose-50 px-4 py-2 rounded-xl transition-colors border border-transparent hover:border-rose-100">
+                <Trash2 size={16} className="mr-2"/> Hapus
+              </button>
+            )}
+          </div>
+
+          <div className="flex-1 overflow-auto p-6 space-y-4 bg-gray-50/50 hide-scrollbar">
+            {cart.length === 0 ? (
+              <div className="text-center flex flex-col items-center justify-center h-full text-gray-300">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"><ShoppingCart size={40} className="opacity-50" /></div>
+                <p className="font-bold tracking-wide">Belum ada pesanan.</p>
+              </div>
+            ) : (
+              cart.map(item => (
+                <div key={item.id} className="flex justify-between items-center bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-800 text-lg leading-tight">{item.name}</h4>
+                    <div className={`text-sm font-black ${thm.text} mt-1`}>Rp {item.sellPrice.toLocaleString('id-ID')}</div>
+                  </div>
+                  <div className="flex items-center space-x-2 bg-gray-50 rounded-xl p-1.5 shadow-inner border border-gray-100">
+                    <button onClick={() => updateCartQty(item.id, -1)} className="p-2 rounded-lg bg-white shadow-sm text-gray-500 hover:text-rose-500 transition-colors"><Minus size={16}/></button>
+                    <input 
+                        type="text" 
+                        value={item.qty} 
+                        onChange={(e) => handleQtyChange(item.id, e.target.value)}
+                        className="font-black w-12 text-center text-gray-800 bg-transparent outline-none border-none p-0 focus:ring-0"
+                    />
+                    <button onClick={() => updateCartQty(item.id, 1)} className="p-2 rounded-lg bg-white shadow-sm text-gray-500 hover:text-emerald-500 transition-colors"><Plus size={16}/></button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="p-8 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgb(0,0,0,0.03)] z-10 relative">
+            <div className="flex justify-between mb-4">
+              <span className="font-bold text-gray-400 uppercase tracking-widest text-xs">Total Item</span>
+              <span className="font-black text-gray-800 bg-gray-100 px-3 py-1 rounded-lg">{cart.reduce((s, i) => s + i.qty, 0)}</span>
+            </div>
+            <div className="flex justify-between mb-8 items-end">
+              <span className="font-black text-2xl text-gray-800">Total</span>
+              <span className={`font-black text-4xl bg-clip-text text-transparent ${thm.gradient}`}>Rp {subtotal.toLocaleString('id-ID')}</span>
+            </div>
+            
+            <button 
+              disabled={cart.length === 0}
+              onClick={() => setShowCheckout(true)}
+              className={`w-full py-5 rounded-[1.5rem] font-black text-xl text-white shadow-xl transition-all transform active:scale-95 flex flex-col justify-center items-center ${cart.length === 0 ? 'bg-gray-200 shadow-none cursor-not-allowed text-gray-400' : `${thm.gradient} hover:-translate-y-1 shadow-[#867233]/30`}`}
+            >
+              <span>Bayar Sekarang</span>
+              {cart.length > 0 && <span className="text-[10px] font-bold mt-1 opacity-80 hidden md:block">Tekan F12 (PC)</span>}
             </button>
           </div>
         </div>
 
-        <div className="flex space-x-2 overflow-x-auto hide-scrollbar py-1">
-          {categories.map(cat => (
-             <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-5 py-2.5 rounded-full whitespace-nowrap text-sm font-bold transition-all shadow-sm border ${selectedCategory === cat ? thm.gradient + ' text-white border-transparent' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'}`}>
-               {cat}
-             </button>
-          ))}
-        </div>
-
-        <div className="flex-1 overflow-auto space-y-4 pb-20 px-2 hide-scrollbar">
-          {filteredProducts.map(product => (
-            <div key={product.id} className="bg-white p-6 rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-100 flex items-center justify-between hover:shadow-[0_10px_30px_rgb(0,0,0,0.08)] transition-all transform hover:-translate-y-1 cursor-pointer group" onClick={() => addToCart(product)}>
-              <div className="flex flex-col">
-                <span className="font-black text-gray-800 text-xl group-hover:text-emerald-600 transition-colors">{product.name}</span>
-                <div className="flex items-center space-x-3 mt-2">
-                  <span className="px-3 py-1 bg-gray-100 text-gray-500 rounded-lg text-xs font-bold tracking-wide">{product.category || 'Item'}</span>
-                  <span className={`text-xs font-black tracking-wide ${product.stock > 10 ? 'text-emerald-500' : 'text-rose-500'}`}>Sisa: {product.stock}</span>
-                </div>
-              </div>
-              <div className="flex items-center space-x-5">
-                <span className={`font-black text-2xl bg-clip-text text-transparent ${thm.gradient}`}>Rp {product.sellPrice.toLocaleString('id-ID')}</span>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); addToCart(product); }}
-                  className={`p-3 rounded-2xl ${thm.light} ${thm.text} hover:scale-110 transition-transform shadow-sm`}
-                >
-                  <Plus size={24} />
-                </button>
-              </div>
+        {alertMsg && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm rounded-[2.5rem]"></div>
+            <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full text-center relative z-10 animate-scaleIn shadow-2xl border border-white">
+              <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4"><Package size={30} /></div>
+              <h3 className="font-black text-gray-800 mb-2">Peringatan</h3>
+              <p className="text-sm text-gray-500 font-medium mb-6">{alertMsg}</p>
+              <button onClick={() => setAlertMsg('')} className="w-full py-3 bg-gray-100 text-gray-600 font-black rounded-xl hover:bg-gray-200 transition-colors">Tutup</button>
             </div>
-          ))}
-          {filteredProducts.length === 0 && <div className="text-center p-10 text-gray-400 font-bold">Produk tidak ditemukan.</div>}
-        </div>
-      </div>
-
-      <div className="w-[420px] bg-white flex flex-col shadow-[-10px_0_40px_rgb(0,0,0,0.05)] z-20 border-l border-gray-100">
-        <div className="p-6 flex justify-between items-center bg-white z-10 shadow-sm">
-          <h2 className="text-2xl font-black text-gray-800 tracking-tight flex items-center"><ShoppingCart size={24} className="mr-3 text-emerald-500"/> Pesanan</h2>
-          {cart.length > 0 && (
-            <button onClick={() => setCart([])} className="text-rose-500 text-sm font-black flex items-center hover:bg-rose-50 px-4 py-2 rounded-xl transition-colors border border-transparent hover:border-rose-100">
-              <Trash2 size={16} className="mr-2"/> Hapus
-            </button>
-          )}
-        </div>
-
-        <div className="flex-1 overflow-auto p-6 space-y-4 bg-gray-50/50 hide-scrollbar">
-          {cart.length === 0 ? (
-            <div className="text-center flex flex-col items-center justify-center h-full text-gray-300">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"><ShoppingCart size={40} className="opacity-50" /></div>
-              <p className="font-bold tracking-wide">Belum ada pesanan.</p>
-            </div>
-          ) : (
-            cart.map(item => (
-              <div key={item.id} className="flex justify-between items-center bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                <div className="flex-1">
-                  <h4 className="font-bold text-gray-800 text-lg leading-tight">{item.name}</h4>
-                  <div className={`text-sm font-black ${thm.text} mt-1`}>Rp {item.sellPrice.toLocaleString('id-ID')}</div>
-                </div>
-                <div className="flex items-center space-x-2 bg-gray-50 rounded-xl p-1.5 shadow-inner border border-gray-100">
-                  <button onClick={() => updateCartQty(item.id, -1)} className="p-2 rounded-lg bg-white shadow-sm text-gray-500 hover:text-rose-500 transition-colors"><Minus size={16}/></button>
-                  {/* INSTRUKSI 3: Input Qty Manual */}
-                  <input 
-                      type="text" 
-                      value={item.qty} 
-                      onChange={(e) => handleQtyChange(item.id, e.target.value)}
-                      className="font-black w-12 text-center text-gray-800 bg-transparent outline-none border-none p-0 focus:ring-0"
-                  />
-                  <button onClick={() => updateCartQty(item.id, 1)} className="p-2 rounded-lg bg-white shadow-sm text-gray-500 hover:text-emerald-500 transition-colors"><Plus size={16}/></button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="p-8 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgb(0,0,0,0.03)] z-10 relative">
-          <div className="flex justify-between mb-4">
-            <span className="font-bold text-gray-400 uppercase tracking-widest text-xs">Total Item</span>
-            <span className="font-black text-gray-800 bg-gray-100 px-3 py-1 rounded-lg">{cart.reduce((s, i) => s + i.qty, 0)}</span>
           </div>
-          <div className="flex justify-between mb-8 items-end">
-            <span className="font-black text-2xl text-gray-800">Total</span>
-            <span className={`font-black text-4xl bg-clip-text text-transparent ${thm.gradient}`}>Rp {subtotal.toLocaleString('id-ID')}</span>
-          </div>
-          
-          <button 
-            disabled={cart.length === 0}
-            onClick={() => setShowCheckout(true)}
-            className={`w-full py-5 rounded-[1.5rem] font-black text-xl text-white shadow-xl transition-all transform active:scale-95 flex flex-col justify-center items-center ${cart.length === 0 ? 'bg-gray-200 shadow-none cursor-not-allowed text-gray-400' : `${thm.gradient} hover:-translate-y-1 shadow-[#867233]/30`}`}
-          >
-            <span>Bayar Sekarang</span>
-            {cart.length > 0 && <span className="text-[10px] font-bold mt-1 opacity-80 hidden md:block">Tekan F12 (PC)</span>}
-          </button>
-        </div>
+        )}
       </div>
 
       {showCheckout && <CheckoutModal subtotal={subtotal} customers={customers} onClose={() => setShowCheckout(false)} onProcess={processCheckout} thm={thm} />}
       {showReceipt && <ReceiptModal transaction={lastTransaction} settings={settings} onClose={() => setShowReceipt(false)} thm={thm} />}
       {showScanner && <BarcodeScannerModal onClose={() => setShowScanner(false)} onScan={(text) => { setSearch(text); setShowScanner(false); }} />}
-
-      {alertMsg && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm rounded-[2.5rem]"></div>
-          <div className="bg-white rounded-[2rem] p-6 max-w-xs w-full text-center relative z-10 animate-scaleIn shadow-2xl border border-white">
-            <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4"><Package size={30} /></div>
-            <h3 className="font-black text-gray-800 mb-2">Peringatan</h3>
-            <p className="text-sm text-gray-500 font-medium mb-6">{alertMsg}</p>
-            <button onClick={() => setAlertMsg('')} className="w-full py-3 bg-gray-100 text-gray-600 font-black rounded-xl hover:bg-gray-200 transition-colors">Tutup</button>
-          </div>
-        </div>
-      )}
-    </div>
+    </>
   );
 }
 
@@ -756,7 +710,6 @@ function CheckoutModal({ subtotal, customers, onClose, onProcess, thm }) {
     }
   };
 
-  // INSTRUKSI 4: Pop-up pembayaran, tekan enter untuk bayar (Tunai Khususnya)
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && window.innerWidth > 768) {
         e.preventDefault();
@@ -847,15 +800,15 @@ function CheckoutModal({ subtotal, customers, onClose, onProcess, thm }) {
 
 function ReceiptModal({ transaction, settings, onClose, thm }) {
   return (
-    <div id="receipt-modal" className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fadeIn print:p-0 print:bg-white print:items-start print:justify-center">
-      <div id="receipt-container" className="bg-white rounded-[2rem] shadow-2xl max-w-sm w-full flex flex-col max-h-[90vh] animate-fadeInUp border border-gray-100 overflow-hidden print:shadow-none print:border-none print:rounded-none print:max-h-none print:w-full">
+    <div id="receipt-modal" className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fadeIn print:relative print:inset-auto print:bg-white print:p-0 print:block">
+      <div id="receipt-container" className="bg-white rounded-[2rem] shadow-2xl max-w-sm w-full flex flex-col max-h-[90vh] animate-fadeInUp border border-gray-100 overflow-hidden print:shadow-none print:border-none print:rounded-none print:max-h-none print:h-auto print:w-full print:block">
         
         <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50 print:hidden">
           <h3 className="font-black text-gray-800 flex items-center"><FileText size={20} className="mr-2 text-gray-400"/> Preview Struk</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-800 bg-white p-1.5 rounded-lg shadow-sm border border-gray-200 transition-colors"><X size={20}/></button>
         </div>
 
-        <div id="receipt-content" className="p-8 overflow-y-auto font-mono text-sm text-gray-800 bg-white print:p-0 print:overflow-visible">
+        <div id="receipt-content" className="p-8 overflow-y-auto font-mono text-sm text-gray-800 bg-white print:p-0 print:overflow-visible print:h-auto print:block">
           <div className="text-center mb-6">
             {settings.receiptLogo && <img src={settings.receiptLogo} alt="Logo" className="h-16 mx-auto mb-3 object-contain" />}
             <h2 className="text-2xl font-black uppercase tracking-widest">{settings.storeName}</h2>
@@ -1020,12 +973,10 @@ function DebtsView({ transactions, setTransactions, thm }) {
     if (filterCustomer !== 'Semua') {
       result = result.filter(d => d.customerName === filterCustomer);
     }
-    // Default sort by terbaru
     result.sort((a, b) => new Date(b.date) - new Date(a.date));
     return result;
   }, [debts, filterCustomer]);
 
-  // Hitung total hutang berdasarkan filter (Instruksi 3)
   const totalDebtFiltered = processedDebts.reduce((sum, d) => sum + d.total, 0);
 
   const payDebt = (id) => {
@@ -1043,7 +994,6 @@ function DebtsView({ transactions, setTransactions, thm }) {
       <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 space-y-4 md:space-y-0">
         <h2 className="text-3xl font-black text-gray-800 tracking-tight">Buku Kasbon / Piutang</h2>
         
-        {/* WIDGET FILTER PELANGGAN & TOTAL NOMINAL */}
         <div className="flex space-x-4 animate-scaleIn items-end">
           <div className="flex flex-col">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Filter Pelanggan</label>
@@ -1362,79 +1312,79 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
   };
 
   return (
-    <div className="p-8 animate-fadeIn max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 space-y-4 md:space-y-0">
-        <div>
-          <h2 className="text-3xl font-black text-gray-800 tracking-tight">Riwayat Transaksi</h2>
-          <p className="text-sm font-bold text-gray-400 mt-2 tracking-wide">Ditemukan {filteredTx.length} nota</p>
-        </div>
-        <div className="flex space-x-3">
-          {authUser.role === 'owner' && (
-            <>
-              <label className="cursor-pointer bg-white border border-gray-200 text-gray-600 px-5 py-3 rounded-2xl flex items-center hover:bg-gray-50 shadow-sm font-black transition-colors">
-                <Upload size={20} className="mr-2 text-teal-500"/> Import Data
-                <input type="file" accept=".csv" className="hidden" onChange={importCSV} />
-              </label>
-              <button onClick={exportCSV} className={`flex items-center px-5 py-3 ${thm.gradient} text-white font-black rounded-2xl shadow-lg shadow-[#867233]/20 hover:-translate-y-1 transition-transform`}>
-                <Download size={20} className="mr-2"/> Export Data
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-col xl:flex-row xl:justify-between xl:items-center mb-6 gap-4">
-        {/* AREA FILTER TANGGAL */}
-        <div className="flex items-center space-x-3 bg-white p-3 rounded-2xl shadow-sm border border-gray-100 max-w-fit">
-          <div className="flex items-center space-x-3 px-2">
-            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Dari:</span>
-            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="bg-gray-50 border-none text-gray-700 text-sm rounded-xl focus:ring-2 outline-none p-2 font-bold" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }} />
+    <>
+      <div className="p-8 animate-fadeIn max-w-7xl mx-auto print:hidden">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 space-y-4 md:space-y-0">
+          <div>
+            <h2 className="text-3xl font-black text-gray-800 tracking-tight">Riwayat Transaksi</h2>
+            <p className="text-sm font-bold text-gray-400 mt-2 tracking-wide">Ditemukan {filteredTx.length} nota</p>
           </div>
-          <div className="flex items-center space-x-3 px-2 border-l border-gray-100">
-            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Sampai:</span>
-            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="bg-gray-50 border-none text-gray-700 text-sm rounded-xl focus:ring-2 outline-none p-2 font-bold" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }} />
+          <div className="flex space-x-3">
+            {authUser.role === 'owner' && (
+              <>
+                <label className="cursor-pointer bg-white border border-gray-200 text-gray-600 px-5 py-3 rounded-2xl flex items-center hover:bg-gray-50 shadow-sm font-black transition-colors">
+                  <Upload size={20} className="mr-2 text-teal-500"/> Import Data
+                  <input type="file" accept=".csv" className="hidden" onChange={importCSV} />
+                </label>
+                <button onClick={exportCSV} className={`flex items-center px-5 py-3 ${thm.gradient} text-white font-black rounded-2xl shadow-lg shadow-[#867233]/20 hover:-translate-y-1 transition-transform`}>
+                  <Download size={20} className="mr-2"/> Export Data
+                </button>
+              </>
+            )}
           </div>
         </div>
 
-        {/* WIDGET REKAP NOMINAL DAN QTY TRANSAKSI */}
-        <div className="flex items-center space-x-4">
-          <div className={`flex flex-col px-6 py-3 rounded-2xl ${thm.light} border ${thm.text.replace('text-', 'border-')}/20 shadow-sm animate-scaleIn`}>
-            <span className={`text-[10px] font-black uppercase tracking-widest ${thm.text} opacity-80 mb-0.5`}>Total Transaksi</span>
-            <span className="text-xl font-black text-gray-800">{filteredTx.length} <span className="text-sm font-bold text-gray-500">Nota</span></span>
+        <div className="flex flex-col xl:flex-row xl:justify-between xl:items-center mb-6 gap-4">
+          <div className="flex items-center space-x-3 bg-white p-3 rounded-2xl shadow-sm border border-gray-100 max-w-fit">
+            <div className="flex items-center space-x-3 px-2">
+              <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Dari:</span>
+              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="bg-gray-50 border-none text-gray-700 text-sm rounded-xl focus:ring-2 outline-none p-2 font-bold" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }} />
+            </div>
+            <div className="flex items-center space-x-3 px-2 border-l border-gray-100">
+              <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Sampai:</span>
+              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="bg-gray-50 border-none text-gray-700 text-sm rounded-xl focus:ring-2 outline-none p-2 font-bold" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }} />
+            </div>
           </div>
-          <div className={`flex flex-col px-6 py-3 rounded-2xl ${thm.gradient} shadow-lg shadow-[#867233]/20 animate-scaleIn`}>
-            <span className="text-[10px] font-black uppercase tracking-widest text-white opacity-90 mb-0.5">Total Pendapatan</span>
-            <span className="text-xl font-black text-white">Rp {filteredTx.reduce((sum, tx) => sum + tx.total, 0).toLocaleString('id-ID')}</span>
+
+          <div className="flex items-center space-x-4">
+            <div className={`flex flex-col px-6 py-3 rounded-2xl ${thm.light} border ${thm.text.replace('text-', 'border-')}/20 shadow-sm animate-scaleIn`}>
+              <span className={`text-[10px] font-black uppercase tracking-widest ${thm.text} opacity-80 mb-0.5`}>Total Transaksi</span>
+              <span className="text-xl font-black text-gray-800">{filteredTx.length} <span className="text-sm font-bold text-gray-500">Nota</span></span>
+            </div>
+            <div className={`flex flex-col px-6 py-3 rounded-2xl ${thm.gradient} shadow-lg shadow-[#867233]/20 animate-scaleIn`}>
+              <span className="text-[10px] font-black uppercase tracking-widest text-white opacity-90 mb-0.5">Total Pendapatan</span>
+              <span className="text-xl font-black text-white">Rp {filteredTx.reduce((sum, tx) => sum + tx.total, 0).toLocaleString('id-ID')}</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 overflow-y-auto max-h-[65vh] hide-scrollbar relative">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50/95 backdrop-blur-sm text-gray-400 text-xs uppercase tracking-widest font-black sticky top-0 z-10 shadow-sm">
-            <tr><th className="p-6">Waktu</th><th className="p-6">ID Transaksi</th><th className="p-6">Pembayaran</th><th className="p-6">Total</th><th className="p-6 text-center">Aksi</th></tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {filteredTx.map(tx => (
-              <tr key={tx.id} className="hover:bg-teal-50/30 transition-colors group">
-                <td className="p-6 font-bold text-sm text-gray-500">{new Date(tx.date).toLocaleString('id-ID')}</td>
-                <td className="p-6 font-black text-gray-800 text-sm">{tx.id}</td>
-                <td className="p-6">
-                  <div className="font-bold text-gray-500 text-sm flex items-center space-x-2">
-                    <span>{tx.paymentMethod}</span>
-                    {tx.paymentMethod === 'Kasbon' && <span className={`px-2.5 py-0.5 text-[10px] font-black uppercase rounded-lg border ${tx.paymentStatus === 'Lunas' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-500 border-rose-100'}`}>{tx.paymentStatus}</span>}
-                  </div>
-                </td>
-                <td className="p-6 font-black text-gray-800">Rp {tx.total.toLocaleString('id-ID')}</td>
-                <td className="p-6 text-center space-x-2">
-                  <button onClick={() => setSelectedTx(tx)} className="p-2 bg-white rounded-xl text-teal-500 hover:bg-teal-100 border border-gray-100 shadow-sm transition"><FileText size={18}/></button>
-                  {authUser.role === 'owner' && <button onClick={() => handleDelete(tx.id)} className="p-2 bg-white rounded-xl text-rose-500 hover:bg-rose-100 border border-gray-100 shadow-sm transition"><Trash2 size={18}/></button>}
-                </td>
-              </tr>
-            ))}
-            {filteredTx.length === 0 && <tr><td colSpan="5" className="p-10 text-center text-gray-400 font-bold">Tidak ada transaksi di rentang tanggal ini.</td></tr>}
-          </tbody>
-        </table>
+        <div className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 overflow-y-auto max-h-[65vh] hide-scrollbar relative">
+          <table className="w-full text-left">
+            <thead className="bg-gray-50/95 backdrop-blur-sm text-gray-400 text-xs uppercase tracking-widest font-black sticky top-0 z-10 shadow-sm">
+              <tr><th className="p-6">Waktu</th><th className="p-6">ID Transaksi</th><th className="p-6">Pembayaran</th><th className="p-6">Total</th><th className="p-6 text-center">Aksi</th></tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {filteredTx.map(tx => (
+                <tr key={tx.id} className="hover:bg-teal-50/30 transition-colors group">
+                  <td className="p-6 font-bold text-sm text-gray-500">{new Date(tx.date).toLocaleString('id-ID')}</td>
+                  <td className="p-6 font-black text-gray-800 text-sm">{tx.id}</td>
+                  <td className="p-6">
+                    <div className="font-bold text-gray-500 text-sm flex items-center space-x-2">
+                      <span>{tx.paymentMethod}</span>
+                      {tx.paymentMethod === 'Kasbon' && <span className={`px-2.5 py-0.5 text-[10px] font-black uppercase rounded-lg border ${tx.paymentStatus === 'Lunas' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-500 border-rose-100'}`}>{tx.paymentStatus}</span>}
+                    </div>
+                  </td>
+                  <td className="p-6 font-black text-gray-800">Rp {tx.total.toLocaleString('id-ID')}</td>
+                  <td className="p-6 text-center space-x-2">
+                    <button onClick={() => setSelectedTx(tx)} className="p-2 bg-white rounded-xl text-teal-500 hover:bg-teal-100 border border-gray-100 shadow-sm transition"><FileText size={18}/></button>
+                    {authUser.role === 'owner' && <button onClick={() => handleDelete(tx.id)} className="p-2 bg-white rounded-xl text-rose-500 hover:bg-rose-100 border border-gray-100 shadow-sm transition"><Trash2 size={18}/></button>}
+                  </td>
+                </tr>
+              ))}
+              {filteredTx.length === 0 && <tr><td colSpan="5" className="p-10 text-center text-gray-400 font-bold">Tidak ada transaksi di rentang tanggal ini.</td></tr>}
+            </tbody>
+          </table>
+        </div>
       </div>
       
       {selectedTx && <ReceiptModal transaction={selectedTx} settings={settings} onClose={() => setSelectedTx(null)} thm={thm} />}
@@ -1463,7 +1413,7 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -1484,7 +1434,6 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
     }
   };
 
-  // INSTRUKSI 4: Memindai kamera / scanner barcode
   const detectCameras = async () => {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
@@ -1560,7 +1509,6 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
                    <option value="usb">USB Scanner (Barcode Reader)</option>
                  </select>
                  
-                 {/* INSTRUKSI 4: Tombol Pindai Perangkat */}
                  <button type="button" onClick={detectCameras} className={`w-full px-5 py-4 rounded-2xl text-white font-black shadow-md hover:-translate-y-0.5 transition-transform flex items-center justify-center ${thm.gradient}`}>
                     <Monitor size={20} className="inline mr-2"/> Pindai Perangkat
                  </button>
@@ -1621,9 +1569,8 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
 
         <button type="submit" className={`w-full py-5 ${thm.gradient} text-white font-black text-lg rounded-2xl shadow-xl hover:-translate-y-1 transform transition-all active:scale-95`}>Simpan Pengaturan</button>
 
-        {/* INSTRUKSI 4: Versi Aplikasi */}
         <div className="pt-8 text-center text-xs font-black tracking-widest text-gray-300 uppercase">
-           Versi 1.2
+           Versi 1.2.0 (Build_2026.06.16)
         </div>
 
       </form>
