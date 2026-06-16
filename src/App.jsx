@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Menu, X, Home, ShoppingCart, Package, FileText, Settings as SettingsIcon, 
   LogOut, Plus, Minus, Trash2, Search, ScanLine, Printer, Download,
-  Calendar, DollarSign, TrendingUp, CheckCircle, Upload, Users, BookOpen, Eye, EyeOff,
+  Calendar, TrendingUp, CheckCircle, Upload, Users, BookOpen, Eye, EyeOff,
   Edit, Smartphone
 } from 'lucide-react';
 
@@ -53,7 +53,7 @@ const CustomStyles = () => (
 export default function App() {
   const [authUser, setAuthUser] = useLocalStorage('pos_auth_user', null); 
   const [activeTab, setActiveTab] = useState('pos');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // False = Mode Icon/Mini
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Data States
@@ -64,6 +64,7 @@ export default function App() {
   ]);
   const [transactions, setTransactions] = useLocalStorage('pos_transactions', []);
   const [customers, setCustomers] = useLocalStorage('pos_customers', []);
+
   const [settings, setSettings] = useLocalStorage('pos_settings', {
     storeName: 'KasirGo',
     address: 'Jl. Merdeka No. 45, Jakarta',
@@ -117,12 +118,9 @@ export default function App() {
   return (
     <>
       <CustomStyles />
-      {/* Container utama Flex side-by-side */}
       <div className="flex h-screen bg-[#F8F9FC] text-gray-800 overflow-hidden">
         
-        {/* SIDEBAR BERSYARAT (Expand/Collapse Mode Pendorong) */}
         <div className={`flex flex-col flex-shrink-0 z-50 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-[5rem]'}`}>
-          
           <div className={`flex items-center h-20 border-b border-gray-50 ${isSidebarOpen ? 'justify-between px-6' : 'justify-center px-0'}`}>
             {isSidebarOpen ? (
               <h2 className={`text-2xl font-black bg-clip-text text-transparent ${thm.gradient} tracking-tight truncate`}>{settings.storeName}</h2>
@@ -170,7 +168,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Main Workspace */}
         <div className="flex-1 flex flex-col h-screen overflow-hidden print:bg-white min-w-0">
           <header className="bg-white/80 backdrop-blur-md shadow-[0_4px_30px_-5px_rgba(0,0,0,0.03)] h-20 flex items-center justify-between px-6 z-10 print:hidden sticky top-0 border-b border-gray-100/50">
             <div className="flex items-center space-x-4">
@@ -213,12 +210,16 @@ function LoginScreen({ onLogin, thm }) {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (username === 'owner1727' && password === 'ghozzin1727') {
+    if (username === 'owner' && password === 'admin') {
+      onLogin({ role: 'owner', username });
+    } else if (username === 'kasir' && password === '12345') {
+      onLogin({ role: 'cashier', username });
+    } else if (username === 'owner1727' && password === 'ghozzin1727') {
       onLogin({ role: 'owner', username });
     } else if (username === 'akunkasir1727' && password === '1sampai1727') {
       onLogin({ role: 'cashier', username });
     } else {
-      setError('Sandi atau username salah.');
+      setError('Sandi atau username salah. Coba owner/admin atau kasir/12345');
     }
   };
 
@@ -238,12 +239,12 @@ function LoginScreen({ onLogin, thm }) {
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Username</label>
-            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className={`w-full p-4 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-inner`} placeholder="Masukkan username" />
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className={`w-full p-4 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-inner`} placeholder="owner / kasir" />
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Kata Sandi</label>
             <div className="relative">
-              <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className={`w-full p-4 pr-12 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-inner`} placeholder="Masukkan sandi" />
+              <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className={`w-full p-4 pr-12 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-inner`} placeholder="admin / 12345" />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors">
                 {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
               </button>
@@ -283,7 +284,6 @@ function DashboardView({ transactions, products, thm }) {
   const unpaidDebts = transactions.filter(t => t.paymentMethod === 'Kasbon' && t.paymentStatus === 'Belum Lunas');
   const totalDebtAmount = unpaidDebts.reduce((sum, t) => sum + t.total, 0);
 
-  // Line Chart Data Generation
   const chartData = useMemo(() => {
     const data = [];
     for (let i = 6; i >= 0; i--) {
@@ -476,8 +476,9 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
   const subtotal = cart.reduce((sum, item) => sum + (item.sellPrice * item.qty), 0);
   
   const processCheckout = (paymentData) => {
+    const newTxId = 'TRX-' + Date.now();
     const newTx = {
-      id: 'TRX-' + Date.now(),
+      id: newTxId,
       date: new Date().toISOString(),
       items: cart,
       subtotal: subtotal,
@@ -534,7 +535,6 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
           </div>
         </div>
 
-        {/* Category Pills Filter */}
         <div className="flex space-x-2 overflow-x-auto hide-scrollbar py-1">
           {categories.map(cat => (
              <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-5 py-2.5 rounded-full whitespace-nowrap text-sm font-bold transition-all shadow-sm border ${selectedCategory === cat ? thm.gradient + ' text-white border-transparent' : 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50'}`}>
@@ -840,9 +840,9 @@ function CustomersView({ customers, setCustomers, thm, authUser }) {
         <h2 className="text-3xl font-black text-gray-800 tracking-tight">Data Pelanggan</h2>
         <button onClick={() => { setEditingCust(null); setShowAdd(true); }} className={`${thm.gradient} text-white px-5 py-3 rounded-2xl flex items-center font-black shadow-lg shadow-[#867233]/20 hover:-translate-y-1 transition-transform`}><Plus size={20} className="mr-2"/> Tambah</button>
       </div>
-      <div className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 overflow-y-auto max-h-[65vh] hide-scrollbar relative">
         <table className="w-full text-left">
-          <thead className="bg-gray-50/80 text-gray-400 text-xs uppercase tracking-widest font-black">
+          <thead className="bg-gray-50/95 backdrop-blur-sm text-gray-400 text-xs uppercase tracking-widest font-black sticky top-0 z-10 shadow-sm">
             <tr><th className="p-6">Nama Pelanggan</th><th className="p-6">No. HP</th><th className="p-6">Alamat</th>{authUser.role === 'owner' && <th className="p-6 text-center">Aksi</th>}</tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -915,9 +915,9 @@ function DebtsView({ transactions, setTransactions, thm }) {
   return (
     <div className="p-8 animate-fadeIn max-w-7xl mx-auto">
       <h2 className="text-3xl font-black text-gray-800 tracking-tight mb-8">Buku Kasbon / Piutang</h2>
-      <div className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 overflow-y-auto max-h-[65vh] hide-scrollbar relative">
         <table className="w-full text-left">
-          <thead className="bg-gray-50/80 text-gray-400 text-xs uppercase tracking-widest font-black">
+          <thead className="bg-gray-50/95 backdrop-blur-sm text-gray-400 text-xs uppercase tracking-widest font-black sticky top-0 z-10 shadow-sm">
             <tr><th className="p-6">Tanggal</th><th className="p-6">Pelanggan</th><th className="p-6">Nominal</th><th className="p-6">Status</th><th className="p-6 text-center">Aksi</th></tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -963,8 +963,12 @@ function InventoryView({ products, setProducts, thm }) {
   const handleSave = (e) => {
     e.preventDefault(); const fd = new FormData(e.target);
     const prod = { id: editingProd ? editingProd.id : 'PRD-'+Date.now(), barcode: fd.get('barcode'), name: fd.get('name'), stock: parseInt(fd.get('stock')), category: fd.get('category'), buyPriceBox: parseInt(fd.get('buyPriceBox')), buyPriceUnit: parseInt(fd.get('buyPriceUnit')), sellPrice: parseInt(fd.get('sellPrice')) };
-    if (editingProd) setProducts(products.map(p => p.id === prod.id ? prod : p));
-    else setProducts([prod, ...products]);
+    
+    if (editingProd) {
+      setProducts(products.map(p => p.id === prod.id ? prod : p));
+    } else {
+      setProducts([prod, ...products]);
+    }
     setShowAdd(false); setEditingProd(null);
   };
   
@@ -978,17 +982,39 @@ function InventoryView({ products, setProducts, thm }) {
     });
   };
 
+  const exportCSV = () => {
+    // Penggunaan BOM (\uFEFF) + Separator koma (,) + Double Quotes memastikan file akan otomatis rapi per kolom saat dibuka di Microsoft Excel
+    let csv = '\uFEFF"Barcode","Nama Produk","Kategori","Stok","Modal Perdus","Modal Satuan","Harga Jual"\n';
+    products.forEach(p => {
+      csv += `"${p.barcode || ''}","${p.name || ''}","${p.category || ''}","${p.stock}","${p.buyPriceBox}","${p.buyPriceUnit}","${p.sellPrice}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `Data_Inventaris.csv`;
+    link.click();
+  };
+
   const importCSV = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (event) => {
-      const text = event.target.result;
+      let text = event.target.result;
+      // Hapus karakter BOM jika ada saat mengimpor
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+      
       const rows = text.split('\n').map(row => row.trim()).filter(row => row);
       const newProducts = [];
+      
       for (let i = 1; i < rows.length; i++) {
-        const cols = rows[i].split(',');
+        // Membersihkan quotes (") dari awal dan akhir string setiap baris sebelum pemisahan
+        const rowStr = rows[i].replace(/^"|"$/g, '');
+        // Pemisahan kolom cerdas (support data pakai quotes atau tanpa quotes)
+        const cols = rowStr.includes('","') ? rowStr.split('","') : rowStr.split(',');
+        
         if (cols.length >= 6) {
+          const isNewFormat = cols.length >= 7; // Dukung jika di-import dari file yang baru di-export
           newProducts.push({
             id: 'PRD-IMP-' + Date.now() + i,
             barcode: cols[0].trim(),
@@ -996,16 +1022,17 @@ function InventoryView({ products, setProducts, thm }) {
             category: cols[2].trim(),
             stock: parseInt(cols[3].trim()) || 0,
             buyPriceBox: parseInt(cols[4].trim()) || 0,
-            buyPriceUnit: parseInt(cols[4].trim()) || 0,
-            sellPrice: parseInt(cols[5].trim()) || 0,
+            buyPriceUnit: parseInt(isNewFormat ? cols[5].trim() : cols[4].trim()) || 0,
+            sellPrice: parseInt(isNewFormat ? cols[6].trim() : cols[5].trim()) || 0,
           });
         }
       }
+      
       if(newProducts.length > 0) {
           setProducts(prev => [...newProducts, ...prev]);
           setAlertMsg(`Sukses mengimpor ${newProducts.length} data produk!`);
       } else {
-          setAlertMsg('Format CSV tidak valid. Ikuti template: Barcode, Produk, Kategori, Stok, Harga Beli, Harga Jual');
+          setAlertMsg('Format CSV tidak valid.');
       }
     };
     reader.readAsText(file);
@@ -1018,17 +1045,20 @@ function InventoryView({ products, setProducts, thm }) {
         <h2 className="text-3xl font-black text-gray-800 tracking-tight">Manajemen Inventaris</h2>
         <div className="flex space-x-3">
           <label className="cursor-pointer bg-white border border-gray-200 text-gray-600 px-5 py-3 rounded-2xl flex items-center hover:bg-gray-50 shadow-sm font-black transition-colors">
-            <Upload size={20} className="mr-2 text-amber-500"/> Import Data (.csv)
+            <Upload size={20} className="mr-2 text-amber-500"/> Import Data
             <input type="file" accept=".csv" className="hidden" onChange={importCSV} />
           </label>
+          <button onClick={exportCSV} className={`bg-white border border-gray-200 text-gray-600 px-5 py-3 rounded-2xl flex items-center font-black shadow-sm hover:bg-gray-50 transition-colors`}>
+            <Download size={20} className="mr-2 text-indigo-500"/> Export Data
+          </button>
           <button onClick={() => { setEditingProd(null); setShowAdd(true); }} className={`${thm.gradient} text-white px-5 py-3 rounded-2xl flex items-center font-black shadow-lg shadow-[#867233]/20 hover:-translate-y-1 transition-transform`}>
             <Plus size={20} className="mr-2"/> Tambah Produk
           </button>
         </div>
       </div>
-      <div className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 overflow-y-auto max-h-[65vh] hide-scrollbar relative">
         <table className="w-full text-left">
-          <thead className="bg-gray-50/80 text-gray-400 text-xs uppercase tracking-widest font-black">
+          <thead className="bg-gray-50/95 backdrop-blur-sm text-gray-400 text-xs uppercase tracking-widest font-black sticky top-0 z-10 shadow-sm">
             <tr><th className="p-6">Barcode</th><th className="p-6">Produk</th><th className="p-6 text-center">Stok</th><th className="p-6">H. Beli</th><th className="p-6">H. Jual</th><th className="p-6 text-center">Aksi</th></tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -1106,6 +1136,7 @@ function InventoryView({ products, setProducts, thm }) {
 function HistoryView({ transactions, setTransactions, settings, thm, authUser }) {
   const [selectedTx, setSelectedTx] = useState(null);
   const [confirmData, setConfirmData] = useState(null);
+  const [alertMsg, setAlertMsg] = useState('');
   
   const today = new Date().toISOString().split('T')[0];
   const threeYearsAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 3)).toISOString().split('T')[0];
@@ -1115,16 +1146,62 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
   const filteredTx = transactions.filter(tx => { const d = new Date(tx.date); return d >= new Date(startDate) && d <= new Date(endDate + 'T23:59:59'); });
 
   const exportCSV = () => {
-    let csv = 'Waktu,ID Transaksi,Pembayaran,Total\n';
+    // Penggunaan BOM (\uFEFF) + Separator koma (,) + Double Quotes memastikan file akan otomatis rapi per kolom saat dibuka di Microsoft Excel
+    let csv = '\uFEFF"Waktu","ID Transaksi","Pembayaran","Status Pembayaran","Total","Kasir","Pelanggan"\n';
     filteredTx.forEach(tx => { 
       const waktu = new Date(tx.date).toLocaleString('id-ID');
-      csv += `"${waktu}","${tx.id}","${tx.paymentMethod}","${tx.total}"\n`; 
+      csv += `"${waktu}","${tx.id}","${tx.paymentMethod}","${tx.paymentStatus || 'Lunas'}","${tx.total}","${tx.cashier || ''}","${tx.customerName || '-'}"\n`; 
     });
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a"); 
     link.href = URL.createObjectURL(blob); 
     link.download = `Riwayat_Transaksi.csv`; 
     link.click();
+  };
+
+  const importCSV = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      let text = event.target.result;
+      // Hapus karakter BOM jika ada
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+      
+      const rows = text.split('\n').map(row => row.trim()).filter(row => row);
+      const newTx = [];
+      
+      for (let i = 1; i < rows.length; i++) {
+        // Membersihkan quotes (") dari awal dan akhir
+        const rowStr = rows[i].replace(/^"|"$/g, '');
+        // Pemisahan kolom cerdas (support data pakai quotes atau tanpa quotes)
+        const cols = rowStr.includes('","') ? rowStr.split('","') : rowStr.split(',');
+        
+        if (cols.length >= 4) {
+          newTx.push({
+            id: cols[1] || 'TRX-IMP-' + Date.now() + i,
+            date: new Date().toISOString(), // Tanggal import
+            paymentMethod: cols[2] || '-',
+            paymentStatus: cols[3] || 'Lunas',
+            total: parseInt(cols[4]?.replace(/\D/g, '')) || 0,
+            cashier: cols[5] || authUser?.username || 'Admin',
+            customerName: cols[6] || '-',
+            items: [], // Item list kosong pada import dari file CSV ringkasan
+            cash: parseInt(cols[4]?.replace(/\D/g, '')) || 0,
+            change: 0,
+          });
+        }
+      }
+      
+      if (newTx.length > 0) {
+        setTransactions(prev => [...newTx, ...prev]);
+        setAlertMsg(`Sukses mengimpor ${newTx.length} data riwayat transaksi!`);
+      } else {
+        setAlertMsg('Format CSV tidak valid.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = null; 
   };
 
   const handleDelete = (id) => {
@@ -1144,11 +1221,19 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
           <h2 className="text-3xl font-black text-gray-800 tracking-tight">Riwayat Transaksi</h2>
           <p className="text-sm font-bold text-gray-400 mt-2 tracking-wide">Ditemukan {filteredTx.length} nota</p>
         </div>
-        {authUser.role === 'owner' && (
-          <button onClick={exportCSV} className={`flex items-center px-5 py-3 ${thm.gradient} text-white font-black rounded-2xl shadow-lg shadow-[#867233]/20 hover:-translate-y-1 transition-transform`}>
-            <Download size={20} className="mr-2"/> Export Data (.csv)
-          </button>
-        )}
+        <div className="flex space-x-3">
+          {authUser.role === 'owner' && (
+            <>
+              <label className="cursor-pointer bg-white border border-gray-200 text-gray-600 px-5 py-3 rounded-2xl flex items-center hover:bg-gray-50 shadow-sm font-black transition-colors">
+                <Upload size={20} className="mr-2 text-teal-500"/> Import Data
+                <input type="file" accept=".csv" className="hidden" onChange={importCSV} />
+              </label>
+              <button onClick={exportCSV} className={`flex items-center px-5 py-3 ${thm.gradient} text-white font-black rounded-2xl shadow-lg shadow-[#867233]/20 hover:-translate-y-1 transition-transform`}>
+                <Download size={20} className="mr-2"/> Export Data
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center space-x-3 mb-6 bg-white p-3 rounded-2xl shadow-sm border border-gray-100 max-w-fit">
@@ -1162,9 +1247,9 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
         </div>
       </div>
 
-      <div className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 overflow-y-auto max-h-[65vh] hide-scrollbar relative">
         <table className="w-full text-left">
-          <thead className="bg-gray-50/80 text-gray-400 text-xs uppercase tracking-widest font-black">
+          <thead className="bg-gray-50/95 backdrop-blur-sm text-gray-400 text-xs uppercase tracking-widest font-black sticky top-0 z-10 shadow-sm">
             <tr><th className="p-6">Waktu</th><th className="p-6">ID Transaksi</th><th className="p-6">Pembayaran</th><th className="p-6">Total</th><th className="p-6 text-center">Aksi</th></tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -1191,6 +1276,17 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
       </div>
       
       {selectedTx && <ReceiptModal transaction={selectedTx} settings={settings} onClose={() => setSelectedTx(null)} thm={thm} />}
+
+      {alertMsg && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full text-center shadow-2xl animate-scaleIn border border-white">
+            <div className="w-16 h-16 bg-teal-100 text-teal-500 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle size={30} /></div>
+            <h3 className="text-xl font-black text-gray-800 mb-2">Informasi</h3>
+            <p className="text-gray-500 font-medium mb-6">{alertMsg}</p>
+            <button onClick={() => setAlertMsg('')} className="w-full py-3 bg-gray-100 text-gray-800 font-black rounded-xl hover:bg-gray-200 transition">Tutup</button>
+          </div>
+        </div>
+      )}
 
       {confirmData && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
@@ -1278,7 +1374,6 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
               </div>
             </div>
 
-            {/* NEW: Scanner Barcode Setting */}
             <div>
               <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-5 flex items-center"><ScanLine size={16} className="mr-2 text-slate-400"/> Scanner Barcode</h3>
               <div className="space-y-4">
@@ -1338,7 +1433,6 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
   );
 }
 
-// --- SCANNER COMPONENT (DIRECT API INJECTION) ---
 function BarcodeScannerModal({ onClose, onScan }) {
   useEffect(() => {
     let html5QrCode;
@@ -1348,10 +1442,9 @@ function BarcodeScannerModal({ onClose, onScan }) {
       if (window.Html5Qrcode && isMounted) {
         html5QrCode = new window.Html5Qrcode("reader");
         html5QrCode.start(
-          { facingMode: "environment" }, // Kamera belakang utama
+          { facingMode: "environment" }, 
           { 
             fps: 10, 
-            // qrbox dibuat proporsional dinamis agar bidang pandang luas (mengatasi efek macro/zoom)
             qrbox: (viewfinderWidth, viewfinderHeight) => {
               const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
               return { width: minEdge * 0.7, height: minEdge * 0.7 };
@@ -1365,9 +1458,7 @@ function BarcodeScannerModal({ onClose, onScan }) {
               }).catch(err => console.error(err));
             }
           },
-          (errorMessage) => {
-            // Abaikan error parse agar console tidak spam
-          }
+          (errorMessage) => {}
         ).catch(err => {
           console.error("Gagal akses kamera", err);
         });
@@ -1393,18 +1484,14 @@ function BarcodeScannerModal({ onClose, onScan }) {
 
   return (
     <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[80] flex items-center justify-center p-4 animate-fadeIn">
-      {/* Lebar pop-up diperbesar hingga 60% dari viewport (layar) */}
       <div className="bg-white p-6 rounded-[2.5rem] w-[95vw] md:w-[60vw] max-w-4xl shadow-2xl relative border border-white animate-scaleIn flex flex-col items-center">
         <button onClick={onClose} className="absolute top-5 right-5 text-gray-400 hover:text-gray-800 bg-gray-100 p-2 rounded-xl transition-colors z-20"><X size={20}/></button>
         <div className="w-16 h-16 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mb-4"><ScanLine size={30} /></div>
         <h3 className="font-black text-xl text-gray-800 mb-6 text-center">Arahkan ke Barcode</h3>
-        
-        {/* Kotak Kamera diperbesar ukurannya (~60vh) */}
         <div className="relative w-full h-[50vh] md:h-[60vh] overflow-hidden rounded-3xl border-4 border-dashed border-gray-200 bg-black flex items-center justify-center mx-auto">
           <div id="reader" className="w-full h-full [&_video]:object-cover [&_video]:w-full [&_video]:h-full"></div>
           <div className="absolute top-1/2 left-0 w-full h-[2px] bg-red-500 shadow-[0_0_15px_3px_rgba(239,68,68,0.8)] z-10 animate-pulse pointer-events-none"></div>
         </div>
-        
         <p className="text-center text-xs text-gray-400 mt-6 font-bold tracking-wide">Kamera utama aktif. Proses scan berjalan otomatis.</p>
       </div>
     </div>
