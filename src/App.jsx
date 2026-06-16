@@ -31,24 +31,30 @@ const useLocalStorage = (key, initialValue) => {
 };
 
 // --- CUSTOM STYLES & GOOGLE FONTS ---
-const CustomStyles = () => (
-  <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-    
-    * { font-family: 'Inter', sans-serif; }
-    
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-    
-    .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
-    .animate-fadeInUp { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-    .animate-scaleIn { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-  `}</style>
-);
+const CustomStyles = ({ fontSize }) => {
+  const sizeMap = { sangat_kecil: '12px', kecil: '14px', sedang: '16px', besar: '18px' };
+  const rootSize = sizeMap[fontSize || 'sedang'] || '16px';
+  
+  return (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+      
+      html { font-size: ${rootSize} !important; transition: font-size 0.3s ease-in-out; }
+      * { font-family: 'Inter', sans-serif; }
+      
+      .hide-scrollbar::-webkit-scrollbar { display: none; }
+      .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+      
+      .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+      .animate-fadeInUp { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      .animate-scaleIn { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    `}</style>
+  );
+};
 
 export default function App() {
   const [authUser, setAuthUser] = useLocalStorage('pos_auth_user', null); 
@@ -76,7 +82,8 @@ export default function App() {
     connectedDeviceName: '',
     receiptLogo: null,
     receiptFooter: '*** Terima Kasih ***',
-    scannerType: 'camera'
+    scannerType: 'camera',
+    appFontSize: 'sedang' // Penambahan Default Font Size
   });
 
   const themeColors = {
@@ -103,7 +110,7 @@ export default function App() {
     }
   }, [authUser, activeTab]);
 
-  if (!authUser) return <><CustomStyles/><LoginScreen onLogin={(user) => setAuthUser(user)} thm={thm} /></>;
+  if (!authUser) return <><CustomStyles fontSize="sedang"/><LoginScreen onLogin={(user) => setAuthUser(user)} thm={thm} /></>;
 
   const navItems = [
     { id: 'dashboard', icon: <Home size={20} className={activeTab === 'dashboard' ? 'text-white' : 'text-blue-500'}/>, label: 'Dashboard', roles: ['owner'] },
@@ -117,7 +124,7 @@ export default function App() {
 
   return (
     <>
-      <CustomStyles />
+      <CustomStyles fontSize={settings.appFontSize} />
       <div className="flex h-screen bg-[#F8F9FC] text-gray-800 overflow-hidden">
         
         <div className={`flex flex-col flex-shrink-0 z-50 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-[5rem]'}`}>
@@ -348,7 +355,7 @@ function DashboardView({ transactions, products, thm }) {
           </div>
         </div>
 
-        <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] p-6 border border-gray-100 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all transform hover:-translate-y-1 relative overflow-hidden group">
+        <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] p-6 border border-rose-100 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all transform hover:-translate-y-1 relative overflow-hidden group">
           <div className="absolute -right-6 -top-6 w-24 h-24 bg-rose-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
           <div className="relative z-10">
             <div className="flex items-center space-x-4 mb-4">
@@ -983,7 +990,6 @@ function InventoryView({ products, setProducts, thm }) {
   };
 
   const exportCSV = () => {
-    // Solusi Anti-Berantakan: Menggunakan pemisah Titik Koma (;) yang mana adalah standar Excel Indonesia
     let csv = '\uFEFF"Barcode";"Nama Produk";"Kategori";"Stok";"Modal Perdus";"Modal Satuan";"Harga Jual"\n';
     products.forEach(p => {
       csv += `"${p.barcode || ''}";"${p.name || ''}";"${p.category || ''}";"${p.stock}";"${p.buyPriceBox}";"${p.buyPriceUnit}";"${p.sellPrice}"\n`;
@@ -1008,7 +1014,6 @@ function InventoryView({ products, setProducts, thm }) {
       
       for (let i = 1; i < rows.length; i++) {
         const rowStr = rows[i].replace(/^"|"$/g, '');
-        // Parser adaptif untuk membaca koma (,) maupun titik koma (;)
         const cols = rowStr.includes('";"') ? rowStr.split('";"') : 
                      rowStr.includes('","') ? rowStr.split('","') : 
                      rowStr.includes(';') ? rowStr.split(';') : 
@@ -1147,7 +1152,6 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
   const filteredTx = transactions.filter(tx => { const d = new Date(tx.date); return d >= new Date(startDate) && d <= new Date(endDate + 'T23:59:59'); });
 
   const exportCSV = () => {
-    // Solusi Anti-Berantakan: Titik koma (;) digunakan di sini untuk sinkronisasi dengan Excel Indonesia
     let csv = '\uFEFF"Waktu";"ID Transaksi";"Pembayaran";"Status Pembayaran";"Total";"Kasir";"Pelanggan"\n';
     filteredTx.forEach(tx => { 
       const waktu = new Date(tx.date).toLocaleString('id-ID');
@@ -1237,14 +1241,29 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
         </div>
       </div>
 
-      <div className="flex items-center space-x-3 mb-6 bg-white p-3 rounded-2xl shadow-sm border border-gray-100 max-w-fit">
-        <div className="flex items-center space-x-3 px-2">
-          <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Dari:</span>
-          <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="bg-gray-50 border-none text-gray-700 text-sm rounded-xl focus:ring-2 outline-none p-2 font-bold" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }} />
+      <div className="flex flex-col xl:flex-row xl:justify-between xl:items-center mb-6 gap-4">
+        {/* AREA FILTER TANGGAL */}
+        <div className="flex items-center space-x-3 bg-white p-3 rounded-2xl shadow-sm border border-gray-100 max-w-fit">
+          <div className="flex items-center space-x-3 px-2">
+            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Dari:</span>
+            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="bg-gray-50 border-none text-gray-700 text-sm rounded-xl focus:ring-2 outline-none p-2 font-bold" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }} />
+          </div>
+          <div className="flex items-center space-x-3 px-2 border-l border-gray-100">
+            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Sampai:</span>
+            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="bg-gray-50 border-none text-gray-700 text-sm rounded-xl focus:ring-2 outline-none p-2 font-bold" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }} />
+          </div>
         </div>
-        <div className="flex items-center space-x-3 px-2 border-l border-gray-100">
-          <span className="text-xs font-black text-gray-400 uppercase tracking-widest">Sampai:</span>
-          <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="bg-gray-50 border-none text-gray-700 text-sm rounded-xl focus:ring-2 outline-none p-2 font-bold" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }} />
+
+        {/* WIDGET REKAP NOMINAL DAN QTY TRANSAKSI (Sesuai Instruksi Ke-1) */}
+        <div className="flex items-center space-x-4">
+          <div className={`flex flex-col px-6 py-3 rounded-2xl ${thm.light} border ${thm.text.replace('text-', 'border-')}/20 shadow-sm animate-scaleIn`}>
+            <span className={`text-[10px] font-black uppercase tracking-widest ${thm.text} opacity-80 mb-0.5`}>Total Transaksi</span>
+            <span className="text-xl font-black text-gray-800">{filteredTx.length} <span className="text-sm font-bold text-gray-500">Nota</span></span>
+          </div>
+          <div className={`flex flex-col px-6 py-3 rounded-2xl ${thm.gradient} shadow-lg shadow-[#867233]/20 animate-scaleIn`}>
+            <span className="text-[10px] font-black uppercase tracking-widest text-white opacity-90 mb-0.5">Total Pendapatan</span>
+            <span className="text-xl font-black text-white">Rp {filteredTx.reduce((sum, tx) => sum + tx.total, 0).toLocaleString('id-ID')}</span>
+          </div>
         </div>
       </div>
 
@@ -1408,13 +1427,32 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
         </div>
 
         <div>
-          <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-5">🎨 Warna Tema UI</h3>
-          <div className="flex space-x-5 bg-gray-50 p-6 rounded-3xl w-fit border border-gray-100 shadow-inner">
-            {Object.keys(themeColors).map(color => (
-              <button type="button" key={color} onClick={() => setFormData({...formData, themeColor: color})} className={`w-14 h-14 rounded-2xl ${themeColors[color].gradient} flex items-center justify-center transform transition-all hover:scale-110 shadow-lg ${formData.themeColor === color ? 'ring-4 ring-offset-4 ring-gray-300 scale-110' : 'opacity-80 hover:opacity-100'}`}>
-                {formData.themeColor === color && <CheckCircle className="text-white drop-shadow-md" size={26} />}
-              </button>
-            ))}
+          <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-5">🎨 Pengaturan Tampilan</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-3">Warna Tema UI</label>
+              <div className="flex space-x-5 bg-gray-50 p-6 rounded-3xl w-fit border border-gray-100 shadow-inner">
+                {Object.keys(themeColors).map(color => (
+                  <button type="button" key={color} onClick={() => setFormData({...formData, themeColor: color})} className={`w-14 h-14 rounded-2xl ${themeColors[color].gradient} flex items-center justify-center transform transition-all hover:scale-110 shadow-lg ${formData.themeColor === color ? 'ring-4 ring-offset-4 ring-gray-300 scale-110' : 'opacity-80 hover:opacity-100'}`}>
+                    {formData.themeColor === color && <CheckCircle className="text-white drop-shadow-md" size={26} />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* AREA PENGATURAN FONT (Sesuai Instruksi Ke-1) */}
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-3">Ukuran Font Aplikasi</label>
+              <select value={formData.appFontSize || 'sedang'} onChange={e => setFormData({...formData, appFontSize: e.target.value})} className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-4 outline-none font-bold text-gray-700 shadow-sm appearance-none" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}>
+                <option value="sangat_kecil">Sangat Kecil</option>
+                <option value="kecil">Kecil</option>
+                <option value="sedang">Sedang (Default)</option>
+                <option value="besar">Besar</option>
+              </select>
+              <p className="text-[10px] text-gray-400 font-bold mt-3 leading-relaxed">
+                Mengubah ukuran font akan memperbesar/memperkecil seluruh tampilan teks, layout, dan elemen dalam aplikasi tanpa merusak tata letak.
+              </p>
+            </div>
           </div>
         </div>
         <button type="submit" className={`w-full py-5 ${thm.gradient} text-white font-black text-lg rounded-2xl shadow-xl hover:-translate-y-1 transform transition-all active:scale-95`}>Simpan Pengaturan</button>
