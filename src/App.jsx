@@ -3,7 +3,7 @@ import {
   Menu, X, Home, ShoppingCart, Package, FileText, Settings as SettingsIcon, 
   LogOut, Plus, Minus, Trash2, Search, ScanLine, Printer, Download,
   Calendar, TrendingUp, CheckCircle, Upload, Users, BookOpen, Eye, EyeOff,
-  Edit, Smartphone
+  Edit, Smartphone, Monitor
 } from 'lucide-react';
 
 // --- DATABASE & STATE MANAGEMENT (LocalStorage) ---
@@ -52,6 +52,50 @@ const CustomStyles = ({ fontSize }) => {
       .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
       .animate-fadeInUp { animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       .animate-scaleIn { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        #receipt-content, #receipt-content * {
+          visibility: visible;
+        }
+        #receipt-modal {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background: white;
+          z-index: 9999;
+          padding: 0;
+          display: flex;
+          justify-content: center;
+        }
+        #receipt-container {
+          max-width: 350px;
+          width: 100%;
+          box-shadow: none;
+          border: none;
+          border-radius: 0;
+          max-height: none;
+        }
+        .print\\:hidden {
+          display: none !important;
+        }
+        .print\\:block {
+          display: block !important;
+        }
+        .print\\:p-0 {
+          padding: 0 !important;
+        }
+        .print\\:bg-white {
+          background-color: white !important;
+        }
+        .print\\:overflow-visible {
+          overflow: visible !important;
+        }
+      }
     `}</style>
   );
 };
@@ -83,7 +127,7 @@ export default function App() {
     receiptLogo: null,
     receiptFooter: '*** Terima Kasih ***',
     scannerType: 'camera',
-    appFontSize: 'sedang' // Penambahan Default Font Size
+    appFontSize: 'sedang'
   });
 
   const themeColors = {
@@ -125,7 +169,7 @@ export default function App() {
   return (
     <>
       <CustomStyles fontSize={settings.appFontSize} />
-      <div className="flex h-screen bg-[#F8F9FC] text-gray-800 overflow-hidden">
+      <div className="flex h-screen bg-[#F8F9FC] text-gray-800 overflow-hidden print:hidden">
         
         <div className={`flex flex-col flex-shrink-0 z-50 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64' : 'w-[5rem]'}`}>
           <div className={`flex items-center h-20 border-b border-gray-50 ${isSidebarOpen ? 'justify-between px-6' : 'justify-center px-0'}`}>
@@ -175,8 +219,8 @@ export default function App() {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col h-screen overflow-hidden print:bg-white min-w-0">
-          <header className="bg-white/80 backdrop-blur-md shadow-[0_4px_30px_-5px_rgba(0,0,0,0.03)] h-20 flex items-center justify-between px-6 z-10 print:hidden sticky top-0 border-b border-gray-100/50">
+        <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
+          <header className="bg-white/80 backdrop-blur-md shadow-[0_4px_30px_-5px_rgba(0,0,0,0.03)] h-20 flex items-center justify-between px-6 z-10 sticky top-0 border-b border-gray-100/50">
             <div className="flex items-center space-x-4">
               <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2.5 rounded-2xl ${thm.light} ${thm.text} hover:opacity-80 transition-colors`}>
                 <Menu size={24} />
@@ -194,7 +238,7 @@ export default function App() {
             </div>
           </header>
 
-          <main className="flex-1 overflow-auto bg-[#F8F9FC] print:bg-white print:overflow-visible relative">
+          <main className="flex-1 overflow-auto bg-[#F8F9FC] relative">
             {activeTab === 'dashboard' && authUser.role === 'owner' && <DashboardView transactions={transactions} products={products} thm={thm} />}
             {activeTab === 'pos' && <POSView products={products} setProducts={setProducts} transactions={transactions} setTransactions={setTransactions} customers={customers} settings={settings} thm={thm} authUser={authUser} />}
             {activeTab === 'customers' && <CustomersView customers={customers} setCustomers={setCustomers} thm={thm} authUser={authUser} />}
@@ -205,6 +249,7 @@ export default function App() {
           </main>
         </div>
       </div>
+
     </>
   );
 }
@@ -226,7 +271,8 @@ function LoginScreen({ onLogin, thm }) {
     } else if (username === 'akunkasir1727' && password === '1sampai1727') {
       onLogin({ role: 'cashier', username });
     } else {
-      setError('Sandi atau username salah. Coba owner/admin atau kasir/12345');
+      // INSTRUKSI 4: Pesan error disingkat
+      setError('username atau sandi salah. silakan cek kembali');
     }
   };
 
@@ -246,12 +292,14 @@ function LoginScreen({ onLogin, thm }) {
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Username</label>
-            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className={`w-full p-4 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-inner`} placeholder="owner / kasir" />
+            {/* INSTRUKSI 4: Placeholder diubah */}
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className={`w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:border-transparent ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-sm`} placeholder="masukkan username" />
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-1">Kata Sandi</label>
             <div className="relative">
-              <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className={`w-full p-4 pr-12 bg-gray-50 border-none rounded-2xl focus:bg-white focus:ring-2 ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-inner`} placeholder="admin / 12345" />
+               {/* INSTRUKSI 4: Placeholder diubah */}
+              <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className={`w-full p-4 pr-12 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-2 focus:border-transparent ${thm.ring} transition-all outline-none font-semibold text-gray-800 shadow-sm`} placeholder="masukkan sandi" />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors">
                 {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
               </button>
@@ -480,6 +528,23 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
     }).filter(item => item.qty > 0));
   };
 
+  // FUNGSI INPUT QTY MANUAL (Instruksi 3)
+  const handleQtyChange = (id, value) => {
+      const newQty = parseInt(value);
+      if (isNaN(newQty) || newQty < 1) return;
+      
+      setCart(prev => prev.map(item => {
+          if (item.id === id) {
+              if (newQty > item.stock) {
+                  setAlertMsg(`Stok tidak mencukupi! Maksimal: ${item.stock}`);
+                  return { ...item, qty: item.stock };
+              }
+              return { ...item, qty: newQty };
+          }
+          return item;
+      }));
+  };
+
   const subtotal = cart.reduce((sum, item) => sum + (item.sellPrice * item.qty), 0);
   
   const processCheckout = (paymentData) => {
@@ -521,9 +586,27 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
     }
   };
 
+  // INSTRUKSI 4: Shortcut Keyboard F12 khusus PC
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Cek tombol F12, dan pastikan tidak ada popup yang sedang terbuka, dan keranjang tidak kosong
+      if (e.key === 'F12' && cart.length > 0 && !showCheckout && !showReceipt && !showScanner && !alertMsg) {
+        e.preventDefault(); // Mencegah dev tools browser terbuka (meski di beberapa browser tidak bisa dicegah)
+        
+        // Pengecekan sederhana untuk layar PC (lebar > 768px) sesuai instruksi "hanya berlaku saat menggunakan PC"
+        if (window.innerWidth > 768) {
+          setShowCheckout(true);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [cart, showCheckout, showReceipt, showScanner, alertMsg]);
+
   return (
-    <div className="flex h-full print:block print:h-auto animate-fadeIn relative">
-      <div className="flex-1 flex flex-col print:hidden p-4 space-y-4 max-w-5xl mx-auto">
+    <div className="flex h-full animate-fadeIn relative">
+      <div className="flex-1 flex flex-col p-4 space-y-4 max-w-5xl mx-auto">
         <div className="bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem] p-3 flex items-center space-x-2 border border-gray-100">
           <div className="relative flex-1">
             <Search className="absolute left-5 top-4 text-gray-400" size={22} />
@@ -575,7 +658,7 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
         </div>
       </div>
 
-      <div className="w-[420px] bg-white flex flex-col shadow-[-10px_0_40px_rgb(0,0,0,0.05)] z-20 print:hidden border-l border-gray-100">
+      <div className="w-[420px] bg-white flex flex-col shadow-[-10px_0_40px_rgb(0,0,0,0.05)] z-20 border-l border-gray-100">
         <div className="p-6 flex justify-between items-center bg-white z-10 shadow-sm">
           <h2 className="text-2xl font-black text-gray-800 tracking-tight flex items-center"><ShoppingCart size={24} className="mr-3 text-emerald-500"/> Pesanan</h2>
           {cart.length > 0 && (
@@ -600,7 +683,13 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
                 </div>
                 <div className="flex items-center space-x-2 bg-gray-50 rounded-xl p-1.5 shadow-inner border border-gray-100">
                   <button onClick={() => updateCartQty(item.id, -1)} className="p-2 rounded-lg bg-white shadow-sm text-gray-500 hover:text-rose-500 transition-colors"><Minus size={16}/></button>
-                  <span className="font-black w-8 text-center text-gray-800">{item.qty}</span>
+                  {/* INSTRUKSI 3: Input Qty Manual */}
+                  <input 
+                      type="text" 
+                      value={item.qty} 
+                      onChange={(e) => handleQtyChange(item.id, e.target.value)}
+                      className="font-black w-12 text-center text-gray-800 bg-transparent outline-none border-none p-0 focus:ring-0"
+                  />
                   <button onClick={() => updateCartQty(item.id, 1)} className="p-2 rounded-lg bg-white shadow-sm text-gray-500 hover:text-emerald-500 transition-colors"><Plus size={16}/></button>
                 </div>
               </div>
@@ -608,7 +697,7 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
           )}
         </div>
 
-        <div className="p-8 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgb(0,0,0,0.03)] z-10">
+        <div className="p-8 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgb(0,0,0,0.03)] z-10 relative">
           <div className="flex justify-between mb-4">
             <span className="font-bold text-gray-400 uppercase tracking-widest text-xs">Total Item</span>
             <span className="font-black text-gray-800 bg-gray-100 px-3 py-1 rounded-lg">{cart.reduce((s, i) => s + i.qty, 0)}</span>
@@ -617,12 +706,14 @@ function POSView({ products, setProducts, transactions, setTransactions, custome
             <span className="font-black text-2xl text-gray-800">Total</span>
             <span className={`font-black text-4xl bg-clip-text text-transparent ${thm.gradient}`}>Rp {subtotal.toLocaleString('id-ID')}</span>
           </div>
+          
           <button 
             disabled={cart.length === 0}
             onClick={() => setShowCheckout(true)}
-            className={`w-full py-5 rounded-[1.5rem] font-black text-xl text-white shadow-xl transition-all transform active:scale-95 flex justify-center items-center ${cart.length === 0 ? 'bg-gray-200 shadow-none cursor-not-allowed text-gray-400' : `${thm.gradient} hover:-translate-y-1 shadow-[#867233]/30`}`}
+            className={`w-full py-5 rounded-[1.5rem] font-black text-xl text-white shadow-xl transition-all transform active:scale-95 flex flex-col justify-center items-center ${cart.length === 0 ? 'bg-gray-200 shadow-none cursor-not-allowed text-gray-400' : `${thm.gradient} hover:-translate-y-1 shadow-[#867233]/30`}`}
           >
-            Bayar Sekarang
+            <span>Bayar Sekarang</span>
+            {cart.length > 0 && <span className="text-[10px] font-bold mt-1 opacity-80 hidden md:block">Tekan F12 (PC)</span>}
           </button>
         </div>
       </div>
@@ -665,6 +756,14 @@ function CheckoutModal({ subtotal, customers, onClose, onProcess, thm }) {
     }
   };
 
+  // INSTRUKSI 4: Pop-up pembayaran, tekan enter untuk bayar (Tunai Khususnya)
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && window.innerWidth > 768) {
+        e.preventDefault();
+        handleProcess();
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 print:hidden animate-fadeIn">
       <div className="bg-white rounded-[2.5rem] w-full max-w-md overflow-hidden shadow-2xl animate-fadeInUp border border-white relative z-10">
@@ -692,13 +791,17 @@ function CheckoutModal({ subtotal, customers, onClose, onProcess, thm }) {
 
           {method === 'Tunai' && (
             <div className="animate-fadeIn">
-              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Terima Uang</label>
+              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 flex justify-between">
+                  <span>Terima Uang</span>
+                  <span className="hidden md:inline text-gray-300 normal-case">(Tekan Enter)</span>
+              </label>
               <input 
                 type="text" autoFocus value={cash}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '');
                   setCash(val ? parseInt(val).toLocaleString('id-ID') : '');
                 }}
+                onKeyDown={handleKeyDown}
                 placeholder="0"
                 className="w-full text-right text-4xl font-black p-5 bg-white border border-gray-200 rounded-[1.5rem] focus:ring-4 focus:border-transparent outline-none text-gray-800 shadow-inner transition-shadow"
                 style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}
@@ -744,15 +847,15 @@ function CheckoutModal({ subtotal, customers, onClose, onProcess, thm }) {
 
 function ReceiptModal({ transaction, settings, onClose, thm }) {
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 print:p-0 print:bg-white print:block animate-fadeIn">
-      <div className="bg-white rounded-[2rem] shadow-2xl max-w-sm w-full flex flex-col max-h-[90vh] print:max-h-none print:shadow-none print:rounded-none animate-fadeInUp border border-gray-100 overflow-hidden">
+    <div id="receipt-modal" className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fadeIn print:p-0 print:bg-white print:items-start print:justify-center">
+      <div id="receipt-container" className="bg-white rounded-[2rem] shadow-2xl max-w-sm w-full flex flex-col max-h-[90vh] animate-fadeInUp border border-gray-100 overflow-hidden print:shadow-none print:border-none print:rounded-none print:max-h-none print:w-full">
         
         <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50 print:hidden">
           <h3 className="font-black text-gray-800 flex items-center"><FileText size={20} className="mr-2 text-gray-400"/> Preview Struk</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-800 bg-white p-1.5 rounded-lg shadow-sm border border-gray-200 transition-colors"><X size={20}/></button>
         </div>
 
-        <div className="p-8 overflow-y-auto print:p-0 font-mono text-sm text-gray-800 bg-white">
+        <div id="receipt-content" className="p-8 overflow-y-auto font-mono text-sm text-gray-800 bg-white print:p-0 print:overflow-visible">
           <div className="text-center mb-6">
             {settings.receiptLogo && <img src={settings.receiptLogo} alt="Logo" className="h-16 mx-auto mb-3 object-contain" />}
             <h2 className="text-2xl font-black uppercase tracking-widest">{settings.storeName}</h2>
@@ -907,7 +1010,23 @@ function CustomersView({ customers, setCustomers, thm, authUser }) {
 
 function DebtsView({ transactions, setTransactions, thm }) {
   const [confirmData, setConfirmData] = useState(null);
+  const [filterCustomer, setFilterCustomer] = useState('Semua');
+
   const debts = transactions.filter(t => t.paymentMethod === 'Kasbon');
+  const uniqueCustomers = ['Semua', ...new Set(debts.map(d => d.customerName))];
+
+  const processedDebts = useMemo(() => {
+    let result = [...debts];
+    if (filterCustomer !== 'Semua') {
+      result = result.filter(d => d.customerName === filterCustomer);
+    }
+    // Default sort by terbaru
+    result.sort((a, b) => new Date(b.date) - new Date(a.date));
+    return result;
+  }, [debts, filterCustomer]);
+
+  // Hitung total hutang berdasarkan filter (Instruksi 3)
+  const totalDebtFiltered = processedDebts.reduce((sum, d) => sum + d.total, 0);
 
   const payDebt = (id) => {
     setConfirmData({
@@ -921,14 +1040,37 @@ function DebtsView({ transactions, setTransactions, thm }) {
 
   return (
     <div className="p-8 animate-fadeIn max-w-7xl mx-auto">
-      <h2 className="text-3xl font-black text-gray-800 tracking-tight mb-8">Buku Kasbon / Piutang</h2>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 space-y-4 md:space-y-0">
+        <h2 className="text-3xl font-black text-gray-800 tracking-tight">Buku Kasbon / Piutang</h2>
+        
+        {/* WIDGET FILTER PELANGGAN & TOTAL NOMINAL */}
+        <div className="flex space-x-4 animate-scaleIn items-end">
+          <div className="flex flex-col">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Filter Pelanggan</label>
+            <select 
+              value={filterCustomer} 
+              onChange={(e) => setFilterCustomer(e.target.value)}
+              className="px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 outline-none font-bold text-gray-700 text-sm shadow-sm appearance-none min-w-[180px] transition-all"
+              style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}
+            >
+              {uniqueCustomers.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          
+          <div className={`flex flex-col px-5 py-2.5 rounded-xl ${thm.gradient} shadow-lg shadow-[#867233]/20 animate-scaleIn h-[46px] justify-center`}>
+            <span className="text-[10px] font-black uppercase tracking-widest text-white opacity-90 mb-0.5">Total Hutang {filterCustomer === 'Semua' ? '' : `(${filterCustomer})`}</span>
+            <span className="text-lg font-black text-white whitespace-nowrap">Rp {totalDebtFiltered.toLocaleString('id-ID')}</span>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 overflow-y-auto max-h-[65vh] hide-scrollbar relative">
         <table className="w-full text-left">
           <thead className="bg-gray-50/95 backdrop-blur-sm text-gray-400 text-xs uppercase tracking-widest font-black sticky top-0 z-10 shadow-sm">
             <tr><th className="p-6">Tanggal</th><th className="p-6">Pelanggan</th><th className="p-6">Nominal</th><th className="p-6">Status</th><th className="p-6 text-center">Aksi</th></tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {debts.map(d => (
+            {processedDebts.map(d => (
               <tr key={d.id} className="hover:bg-rose-50/30 transition-colors">
                 <td className="p-6 text-sm font-bold text-gray-500">{new Date(d.date).toLocaleDateString('id-ID')}</td>
                 <td className="p-6 font-black text-gray-800">{d.customerName}</td>
@@ -939,7 +1081,7 @@ function DebtsView({ transactions, setTransactions, thm }) {
                 </td>
               </tr>
             ))}
-            {debts.length === 0 && <tr><td colSpan="5" className="p-10 text-center text-gray-400 font-bold">Tidak ada catatan kasbon.</td></tr>}
+            {processedDebts.length === 0 && <tr><td colSpan="5" className="p-10 text-center text-gray-400 font-bold">Tidak ada catatan kasbon yang sesuai filter.</td></tr>}
           </tbody>
         </table>
       </div>
@@ -1254,7 +1396,7 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
           </div>
         </div>
 
-        {/* WIDGET REKAP NOMINAL DAN QTY TRANSAKSI (Sesuai Instruksi Ke-1) */}
+        {/* WIDGET REKAP NOMINAL DAN QTY TRANSAKSI */}
         <div className="flex items-center space-x-4">
           <div className={`flex flex-col px-6 py-3 rounded-2xl ${thm.light} border ${thm.text.replace('text-', 'border-')}/20 shadow-sm animate-scaleIn`}>
             <span className={`text-[10px] font-black uppercase tracking-widest ${thm.text} opacity-80 mb-0.5`}>Total Transaksi</span>
@@ -1341,6 +1483,22 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
       setAlertMsg('Pencarian dibatalkan atau perangkat tidak ditemukan.');
     }
   };
+
+  // INSTRUKSI 4: Memindai kamera / scanner barcode
+  const detectCameras = async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoInputs = devices.filter(device => device.kind === 'videoinput');
+      if (videoInputs.length > 0) {
+        setAlertMsg(`Ditemukan ${videoInputs.length} kamera/scanner yang dapat digunakan untuk scan barcode.`);
+      } else {
+        setAlertMsg('Tidak ada perangkat kamera atau scanner yang terdeteksi. Pastikan perangkat sudah terhubung dan diizinkan.');
+      }
+    } catch (err) {
+      console.error(err);
+      setAlertMsg('Gagal memindai perangkat. Pastikan izin akses kamera/scanner diberikan di browser Anda.');
+    }
+  };
   
   const handleSubmit = (e) => { 
     e.preventDefault(); 
@@ -1349,9 +1507,9 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto animate-fadeIn">
+    <div className="p-8 max-w-4xl mx-auto animate-fadeIn pb-20">
       <h2 className="text-3xl font-black text-gray-800 tracking-tight mb-8">Pengaturan Toko</h2>
-      <form onSubmit={handleSubmit} className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 p-10 space-y-10">
+      <form onSubmit={handleSubmit} className="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.02)] border border-gray-100 p-10 space-y-10 relative">
         <div>
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-5 flex items-center"><Home size={16} className="mr-2 text-slate-400"/> Profil Usaha</h3>
           <div className="grid grid-cols-2 gap-5">
@@ -1401,6 +1559,12 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
                    <option value="camera">Kamera Bawaan (HP/Webcam)</option>
                    <option value="usb">USB Scanner (Barcode Reader)</option>
                  </select>
+                 
+                 {/* INSTRUKSI 4: Tombol Pindai Perangkat */}
+                 <button type="button" onClick={detectCameras} className={`w-full px-5 py-4 rounded-2xl text-white font-black shadow-md hover:-translate-y-0.5 transition-transform flex items-center justify-center ${thm.gradient}`}>
+                    <Monitor size={20} className="inline mr-2"/> Pindai Perangkat
+                 </button>
+
                  {formData.scannerType === 'usb' && (
                     <p className="text-xs text-gray-500 font-bold bg-gray-50 p-3 rounded-xl border border-gray-100">
                        Pastikan alat Scanner USB Anda sudah tertancap ke perangkat dan terdeteksi sebagai keyboard.
@@ -1440,7 +1604,6 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
               </div>
             </div>
 
-            {/* AREA PENGATURAN FONT (Sesuai Instruksi Ke-1) */}
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-3">Ukuran Font Aplikasi</label>
               <select value={formData.appFontSize || 'sedang'} onChange={e => setFormData({...formData, appFontSize: e.target.value})} className="w-full p-4 bg-gray-50 rounded-2xl border-none focus:ring-4 outline-none font-bold text-gray-700 shadow-sm appearance-none" style={{ '--tw-ring-color': thm.primary.replace('bg-', '') }}>
@@ -1455,7 +1618,14 @@ function SettingsView({ settings, setSettings, themeColors, thm }) {
             </div>
           </div>
         </div>
+
         <button type="submit" className={`w-full py-5 ${thm.gradient} text-white font-black text-lg rounded-2xl shadow-xl hover:-translate-y-1 transform transition-all active:scale-95`}>Simpan Pengaturan</button>
+
+        {/* INSTRUKSI 4: Versi Aplikasi */}
+        <div className="pt-8 text-center text-xs font-black tracking-widest text-gray-300 uppercase">
+           Versi 1.2
+        </div>
+
       </form>
 
       {alertMsg && (
