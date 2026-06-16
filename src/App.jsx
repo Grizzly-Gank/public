@@ -348,7 +348,7 @@ function DashboardView({ transactions, products, thm }) {
           </div>
         </div>
 
-        <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] p-6 border border-rose-100 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all transform hover:-translate-y-1 relative overflow-hidden group">
+        <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] p-6 border border-gray-100 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] transition-all transform hover:-translate-y-1 relative overflow-hidden group">
           <div className="absolute -right-6 -top-6 w-24 h-24 bg-rose-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
           <div className="relative z-10">
             <div className="flex items-center space-x-4 mb-4">
@@ -983,10 +983,10 @@ function InventoryView({ products, setProducts, thm }) {
   };
 
   const exportCSV = () => {
-    // Penggunaan BOM (\uFEFF) + Separator koma (,) + Double Quotes memastikan file akan otomatis rapi per kolom saat dibuka di Microsoft Excel
-    let csv = '\uFEFF"Barcode","Nama Produk","Kategori","Stok","Modal Perdus","Modal Satuan","Harga Jual"\n';
+    // Solusi Anti-Berantakan: Menggunakan pemisah Titik Koma (;) yang mana adalah standar Excel Indonesia
+    let csv = '\uFEFF"Barcode";"Nama Produk";"Kategori";"Stok";"Modal Perdus";"Modal Satuan";"Harga Jual"\n';
     products.forEach(p => {
-      csv += `"${p.barcode || ''}","${p.name || ''}","${p.category || ''}","${p.stock}","${p.buyPriceBox}","${p.buyPriceUnit}","${p.sellPrice}"\n`;
+      csv += `"${p.barcode || ''}";"${p.name || ''}";"${p.category || ''}";"${p.stock}";"${p.buyPriceBox}";"${p.buyPriceUnit}";"${p.sellPrice}"\n`;
     });
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -1001,29 +1001,30 @@ function InventoryView({ products, setProducts, thm }) {
     const reader = new FileReader();
     reader.onload = (event) => {
       let text = event.target.result;
-      // Hapus karakter BOM jika ada saat mengimpor
       if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
       
       const rows = text.split('\n').map(row => row.trim()).filter(row => row);
       const newProducts = [];
       
       for (let i = 1; i < rows.length; i++) {
-        // Membersihkan quotes (") dari awal dan akhir string setiap baris sebelum pemisahan
         const rowStr = rows[i].replace(/^"|"$/g, '');
-        // Pemisahan kolom cerdas (support data pakai quotes atau tanpa quotes)
-        const cols = rowStr.includes('","') ? rowStr.split('","') : rowStr.split(',');
+        // Parser adaptif untuk membaca koma (,) maupun titik koma (;)
+        const cols = rowStr.includes('";"') ? rowStr.split('";"') : 
+                     rowStr.includes('","') ? rowStr.split('","') : 
+                     rowStr.includes(';') ? rowStr.split(';') : 
+                     rowStr.split(',');
         
         if (cols.length >= 6) {
-          const isNewFormat = cols.length >= 7; // Dukung jika di-import dari file yang baru di-export
+          const isNewFormat = cols.length >= 7;
           newProducts.push({
             id: 'PRD-IMP-' + Date.now() + i,
-            barcode: cols[0].trim(),
-            name: cols[1].trim(),
-            category: cols[2].trim(),
-            stock: parseInt(cols[3].trim()) || 0,
-            buyPriceBox: parseInt(cols[4].trim()) || 0,
-            buyPriceUnit: parseInt(isNewFormat ? cols[5].trim() : cols[4].trim()) || 0,
-            sellPrice: parseInt(isNewFormat ? cols[6].trim() : cols[5].trim()) || 0,
+            barcode: cols[0].replace(/^"|"$/g, '').trim(),
+            name: cols[1].replace(/^"|"$/g, '').trim(),
+            category: cols[2].replace(/^"|"$/g, '').trim(),
+            stock: parseInt(cols[3].replace(/\D/g, '')) || 0,
+            buyPriceBox: parseInt(cols[4].replace(/\D/g, '')) || 0,
+            buyPriceUnit: parseInt(isNewFormat ? cols[5].replace(/\D/g, '') : cols[4].replace(/\D/g, '')) || 0,
+            sellPrice: parseInt(isNewFormat ? cols[6].replace(/\D/g, '') : cols[5].replace(/\D/g, '')) || 0,
           });
         }
       }
@@ -1146,11 +1147,11 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
   const filteredTx = transactions.filter(tx => { const d = new Date(tx.date); return d >= new Date(startDate) && d <= new Date(endDate + 'T23:59:59'); });
 
   const exportCSV = () => {
-    // Penggunaan BOM (\uFEFF) + Separator koma (,) + Double Quotes memastikan file akan otomatis rapi per kolom saat dibuka di Microsoft Excel
-    let csv = '\uFEFF"Waktu","ID Transaksi","Pembayaran","Status Pembayaran","Total","Kasir","Pelanggan"\n';
+    // Solusi Anti-Berantakan: Titik koma (;) digunakan di sini untuk sinkronisasi dengan Excel Indonesia
+    let csv = '\uFEFF"Waktu";"ID Transaksi";"Pembayaran";"Status Pembayaran";"Total";"Kasir";"Pelanggan"\n';
     filteredTx.forEach(tx => { 
       const waktu = new Date(tx.date).toLocaleString('id-ID');
-      csv += `"${waktu}","${tx.id}","${tx.paymentMethod}","${tx.paymentStatus || 'Lunas'}","${tx.total}","${tx.cashier || ''}","${tx.customerName || '-'}"\n`; 
+      csv += `"${waktu}";"${tx.id}";"${tx.paymentMethod}";"${tx.paymentStatus || 'Lunas'}";"${tx.total}";"${tx.cashier || ''}";"${tx.customerName || '-'}"\n`; 
     });
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a"); 
@@ -1165,28 +1166,28 @@ function HistoryView({ transactions, setTransactions, settings, thm, authUser })
     const reader = new FileReader();
     reader.onload = (event) => {
       let text = event.target.result;
-      // Hapus karakter BOM jika ada
       if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
       
       const rows = text.split('\n').map(row => row.trim()).filter(row => row);
       const newTx = [];
       
       for (let i = 1; i < rows.length; i++) {
-        // Membersihkan quotes (") dari awal dan akhir
         const rowStr = rows[i].replace(/^"|"$/g, '');
-        // Pemisahan kolom cerdas (support data pakai quotes atau tanpa quotes)
-        const cols = rowStr.includes('","') ? rowStr.split('","') : rowStr.split(',');
+        const cols = rowStr.includes('";"') ? rowStr.split('";"') : 
+                     rowStr.includes('","') ? rowStr.split('","') : 
+                     rowStr.includes(';') ? rowStr.split(';') : 
+                     rowStr.split(',');
         
         if (cols.length >= 4) {
           newTx.push({
-            id: cols[1] || 'TRX-IMP-' + Date.now() + i,
-            date: new Date().toISOString(), // Tanggal import
-            paymentMethod: cols[2] || '-',
-            paymentStatus: cols[3] || 'Lunas',
+            id: cols[1].replace(/^"|"$/g, '') || 'TRX-IMP-' + Date.now() + i,
+            date: new Date().toISOString(),
+            paymentMethod: cols[2].replace(/^"|"$/g, '') || '-',
+            paymentStatus: cols[3].replace(/^"|"$/g, '') || 'Lunas',
             total: parseInt(cols[4]?.replace(/\D/g, '')) || 0,
-            cashier: cols[5] || authUser?.username || 'Admin',
-            customerName: cols[6] || '-',
-            items: [], // Item list kosong pada import dari file CSV ringkasan
+            cashier: cols[5]?.replace(/^"|"$/g, '') || authUser?.username || 'Admin',
+            customerName: cols[6]?.replace(/^"|"$/g, '') || '-',
+            items: [],
             cash: parseInt(cols[4]?.replace(/\D/g, '')) || 0,
             change: 0,
           });
